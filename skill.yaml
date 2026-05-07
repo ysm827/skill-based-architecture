@@ -33,8 +33,10 @@ triggers:
 files:
   - SKILL.md       # Skill entry: when to use, target structure, core principles
   - WORKFLOW.md    # Migration procedure: quick start, phases, and downstream upgrades
+  - UPSTREAM-CHANGES.md  # Upstream-owned notes for downstream refresh agents
   - REFERENCE.md   # Stub + index, redirects to references/
   - references/    # Layout, thin-shells, protocols, conventions split by topic
+  - scripts/check-upstream-changes.sh  # Guard requiring upstream notes for downstream-facing updates
   - TEMPLATES-GUIDE.md   # Minimal starter + full templates for update-rules, fix-bug, maintain-docs
   - EXAMPLES.md    # Stub + index, redirects to examples/
   - examples/      # Numbered examples and behavior-failure scenarios split by topic

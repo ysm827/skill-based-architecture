@@ -10,7 +10,8 @@ Use when the user says the upstream skill-based-architecture project changed and
 2. **Project knowledge wins** — preserve project-filled rules, gotchas, workflows, routing examples, descriptions, boundaries, and validation commands.
 3. **Agent does the diff** — do not ask the user to compare files. Ask only when a semantic conflict cannot be resolved from local evidence.
 4. **Patch, don't replace** — apply upstream improvements as small edits with `apply_patch` or equivalent. Whole-file replacement is allowed only for a missing file or a file verified to be an unmodified old upstream template.
-5. **Generated shells stay generated** — do not hand-edit generated routing blocks; update `routing.yaml`, then run `scripts/sync-routing.sh`.
+5. **Upstream notes stay upstream** — read `$tmp/upstream/UPSTREAM-CHANGES.md` when present, but never create, copy, or update `UPSTREAM-CHANGES.md` in the downstream project.
+6. **Generated shells stay generated** — do not hand-edit generated routing blocks; update `routing.yaml`, then run `scripts/sync-routing.sh`.
 
 ## Procedure
 
@@ -20,14 +21,16 @@ Use when the user says the upstream skill-based-architecture project changed and
    tmp="$(mktemp -d)"
    git clone https://github.com/WoJiSama/skill-based-architecture.git "$tmp/upstream"
    ```
-3. **Classify files before editing**
+3. **Read upstream update notes** — if `$tmp/upstream/UPSTREAM-CHANGES.md` exists, read the newest relevant entries to learn likely changed areas and intended downstream handling. Use this as a map, not as proof that a file should change, and do not copy it into the downstream repo.
+4. **Classify files before editing**
+   - Upstream-only: `$tmp/upstream/UPSTREAM-CHANGES.md`. Read during refresh; never port into downstream.
    - Project-owned: `rules/project-rules.md`, `rules/coding-standards.md`, `references/gotchas.md`, project-specific workflows, `SKILL.md` prose, `routing.yaml` task examples. Preserve; merge manually if needed.
    - Mechanism-owned: `scripts/*.sh`, universal hooks, protocol-blocks, reusable workflow scaffolding. Compare and port useful upstream changes.
    - Generated: Always Read, Common Tasks, thin-shell bootstraps. Regenerate only.
-4. **Compare as the agent** — for each candidate upstream file, inspect local and upstream versions (`git diff --no-index` is fine). If local contains project-specific edits, keep them and cherry-pick upstream improvements into the local file.
-5. **Use upstream history only as evidence** — if considering whole-file replacement, verify the local file matches a previous upstream version from the cloned repo's history. If no exact historical match, do not replace.
-6. **Update routing deliberately** — add a route only when the downstream project should expose that task. Preserve existing task ids and trigger examples unless clearly obsolete.
-7. **Validate**
+5. **Compare as the agent** — for each candidate upstream file, inspect local and upstream versions (`git diff --no-index` is fine). If local contains project-specific edits, keep them and cherry-pick upstream improvements into the local file.
+6. **Use upstream history only as evidence** — if considering whole-file replacement, verify the local file matches a previous upstream version from the cloned repo's history. If no exact historical match, do not replace.
+7. **Update routing deliberately** — add a route only when the downstream project should expose that task. Preserve existing task ids and trigger examples unless clearly obsolete.
+8. **Validate**
    ```bash
    bash "skills/$NAME/scripts/sync-routing.sh" "$NAME"
    bash "skills/$NAME/scripts/sync-routing.sh" "$NAME" --check
@@ -35,7 +38,7 @@ Use when the user says the upstream skill-based-architecture project changed and
    bash "skills/$NAME/scripts/check-description-routing.sh" "$NAME"
    (cd "skills/$NAME" && bash scripts/audit-references.sh --orphans)
    ```
-8. **Final report** — list upstream changes adopted, local customizations preserved, files intentionally left untouched, validation results, and any unresolved semantic conflicts.
+9. **Final report** — list upstream note entries consulted, upstream changes adopted, local customizations preserved, files intentionally left untouched, validation results, and any unresolved semantic conflicts.
 
 ## Stop Conditions
 
@@ -44,3 +47,4 @@ Use when the user says the upstream skill-based-architecture project changed and
 - Validation fails after the merge and the cause is not isolated.
 
 Do not solve stop conditions by overwriting downstream project knowledge.
+Do not solve missing upstream notes by creating a downstream `UPSTREAM-CHANGES.md`.

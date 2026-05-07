@@ -213,7 +213,7 @@ After the first migration, keep growing the project skill through routing instea
 - Let a workflow invoke another skill when that is the natural tool for the subtask.
 - Add reusable protocol blocks when the same discipline problem repeats.
 - Add one task to `routing.yaml` whenever a new recurring task appears, then run `scripts/sync-routing.sh`.
-- When this upstream project changes, tell the agent "update from upstream"; it should follow `workflows/update-upstream.md`, clone the GitHub source, patch locally, and preserve project-specific rules.
+- When this upstream project changes, tell the agent "update from upstream"; it should follow `workflows/update-upstream.md`, read upstream `UPSTREAM-CHANGES.md` from the cloned upstream repo, patch locally, and preserve project-specific rules.
 
 ---
 
@@ -249,6 +249,7 @@ For Claude Code native skills, avoid generic project skill names that may collid
 |------|---------|
 | [SKILL.md](SKILL.md) | Skill entry: when to use, target structure, and core principles |
 | [WORKFLOW.md](WORKFLOW.md) | Migration guide: decision tree, quick-start scaffold, full 9-phase process, downstream upgrade |
+| [UPSTREAM-CHANGES.md](UPSTREAM-CHANGES.md) | Upstream-owned update notes that downstream refresh agents read before diffing |
 | [REFERENCE.md](REFERENCE.md) | Stub + index — redirects to [`references/`](references/) |
 | [references/](references/) | Layout, thin shells, protocols, conventions, multi-skill routing, skill composition, and self-hosting routing |
 | [TEMPLATES-GUIDE.md](TEMPLATES-GUIDE.md) | Annotated guide for template families and Task Closure Protocol |
@@ -256,6 +257,7 @@ For Claude Code native skills, avoid generic project skill names that may collid
 | [EXAMPLES.md](EXAMPLES.md) | Stub + index — redirects to [`examples/`](examples/) |
 | [examples/](examples/) | Migration, project-type, self-evolution, and behavior-failure examples |
 | [skill.yaml](skill.yaml) | Machine-readable metadata for tool discovery |
+| [scripts/check-upstream-changes.sh](scripts/check-upstream-changes.sh) | Guard that requires upstream change notes for downstream-facing updates |
 
 ---
 
@@ -279,7 +281,7 @@ Keep it as a single file using the minimal starter template. Upgrade only when c
 The recording threshold (2/3: repeatable + costly + not obvious) filters out low-value records. The deprecation workflow in `update-rules.md` removes obsolete rules. `maintain-docs.md`, `check-description-routing.sh`, reference audits, cross-reference checks, and `check-external-facts.sh` catch oversized files, vague triggers, orphaned references, stale links, and stale external claims.
 
 **Q: How do downstream projects receive upstream improvements?**
-Ask the agent to update from upstream. The copied `workflows/update-upstream.md` contains the GitHub source URL and tells the agent to clone the latest upstream, compare files itself, patch useful mechanism changes, preserve project-owned rules/gotchas, then run validation.
+Ask the agent to update from upstream. The copied `workflows/update-upstream.md` contains the GitHub source URL and tells the agent to clone the latest upstream, read upstream `UPSTREAM-CHANGES.md` as a guide, compare files itself, patch useful mechanism changes, preserve project-owned rules/gotchas, then run validation. `UPSTREAM-CHANGES.md` stays upstream-only and is not copied into downstream projects.
 
 ---
 

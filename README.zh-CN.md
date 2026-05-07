@@ -213,7 +213,7 @@ README 只保留操作轮廓。完整迁移清单放在 [WORKFLOW.md](WORKFLOW.m
 - 某个子任务天然适合另一个 skill 时，在 workflow 里调用它。
 - 同一个纪律问题反复出现时，再加入可复用的 protocol block。
 - 新增反复任务时，只在 `routing.yaml` 里加一个 task，再运行 `scripts/sync-routing.sh`。
-- 当这个上游项目更新时，直接让 agent “从上游更新一下”；它应按 `workflows/update-upstream.md` 拉取 GitHub 上游、自己比较并打补丁，同时保留下游项目规则。
+- 当这个上游项目更新时，直接让 agent “从上游更新一下”；它应按 `workflows/update-upstream.md` 拉取 GitHub 上游、只从克隆出来的上游读取 `UPSTREAM-CHANGES.md`，再自己比较并打补丁，同时保留下游项目规则。
 
 ---
 
@@ -247,6 +247,7 @@ Claude Code 原生 skill 要避免使用 `review`、`fix-bug` 这类泛名：如
 |------|------|
 | [SKILL.md](SKILL.md) | Skill 入口：使用时机、目标结构和核心原则 |
 | [WORKFLOW.md](WORKFLOW.md) | 迁移指南：决策树、快速脚手架、完整 9 阶段流程、增量迁移 |
+| [UPSTREAM-CHANGES.md](UPSTREAM-CHANGES.md) | 上游维护的更新说明，下游刷新 agent 先读它再做真实 diff |
 | [REFERENCE.md](REFERENCE.md) | 存根 + 索引 — 指向 [`references/`](references/) |
 | [references/](references/) | 布局、薄壳、协议、约定、多 skill 路由、skill 组合、自托管路由 |
 | [TEMPLATES-GUIDE.md](TEMPLATES-GUIDE.md) | 模板族和 Task Closure Protocol 的注释指南 |
@@ -254,6 +255,7 @@ Claude Code 原生 skill 要避免使用 `review`、`fix-bug` 这类泛名：如
 | [EXAMPLES.md](EXAMPLES.md) | 存根 + 索引 — 指向 [`examples/`](examples/) |
 | [examples/](examples/) | migration、project-types、self-evolution、behavior-failures 示例 |
 | [skill.yaml](skill.yaml) | 机器可读的元数据 |
+| [scripts/check-upstream-changes.sh](scripts/check-upstream-changes.sh) | 检查下游相关上游更新是否同步记录到 `UPSTREAM-CHANGES.md` |
 
 ---
 
@@ -277,7 +279,7 @@ Claude Code 原生 skill 要避免使用 `review`、`fix-bug` 这类泛名：如
 录入门槛（2/3：可重复 + 代价高 + 代码不可见）过滤低价值记录。`update-rules.md` 中的废弃工作流移除过时规则。`maintain-docs.md`、`check-description-routing.sh`、引用审计、交叉引用检查和 `check-external-facts.sh` 捕获超大文件、模糊触发、孤立引用、失效链接和过期外部事实。
 
 **Q: 下游项目如何接收上游改进？**
-直接让 agent 从上游更新。复制到下游的 `workflows/update-upstream.md` 内置 GitHub 上游地址，要求 agent 临时 clone 最新上游、自己比较文件、把有价值的机制改动 patch 进本地，并保留项目自己的规则和坑点。
+直接让 agent 从上游更新。复制到下游的 `workflows/update-upstream.md` 内置 GitHub 上游地址，要求 agent 临时 clone 最新上游、先读取上游 `UPSTREAM-CHANGES.md` 作为线索，再自己比较文件、把有价值的机制改动 patch 进本地，并保留项目自己的规则和坑点。`UPSTREAM-CHANGES.md` 只存在上游，不复制到下游。
 
 ---
 
