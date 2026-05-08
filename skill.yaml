@@ -36,6 +36,8 @@ files:
   - UPSTREAM-CHANGES.md  # Upstream-owned notes for downstream refresh agents
   - REFERENCE.md   # Stub + index, redirects to references/
   - references/    # Layout, thin-shells, protocols, conventions split by topic
+  - scripts/check-all.sh  # One-command upstream maintenance check suite
+  - scripts/check-self-scenarios.sh  # Minimal self-hosting route scenario checks
   - scripts/check-upstream-changes.sh  # Guard requiring upstream notes for downstream-facing updates
   - TEMPLATES-GUIDE.md   # Minimal starter + full templates for update-rules, fix-bug, maintain-docs
   - EXAMPLES.md    # Stub + index, redirects to examples/

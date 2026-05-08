@@ -27,6 +27,10 @@
 
 [English](README.md) | **中文**
 
+Skill-Based Architecture 是一个面向 Agent 规则系统的生命周期管理框架，把散落的提示词文档升级成可路由、可验证、可更新的工程资产。
+
+它关注规则系统本身：结构、路由、workflow、校验、任务复盘、上游/下游更新。它默认不提供具体技术栈规则；后端、前端、部署、团队约定等内容应放在下游项目 skill 或案例里。
+
 > 一个**把散落的 AI Agent 规则整理成项目 skill 的 meta-skill**。它会审计 `AGENTS.md`、`CLAUDE.md`、`.cursor/rules/`、README 注记和本地流程文档，把长期规则、可复用流程、高代价踩坑统一沉淀到 `skills/<name>/`。
 
 **产物不是另一份 README，而是一套项目规则系统。** `SKILL.md` 负责按任务路由；`rules/` 放稳定约束；`workflows/` 放操作流程；`references/` 放架构背景和坑点。各工具入口文件只保留薄壳路由和兼容说明，不再复制规则正文。
@@ -255,6 +259,7 @@ Claude Code 原生 skill 要避免使用 `review`、`fix-bug` 这类泛名：如
 | [EXAMPLES.md](EXAMPLES.md) | 存根 + 索引 — 指向 [`examples/`](examples/) |
 | [examples/](examples/) | migration、project-types、self-evolution、behavior-failures 示例 |
 | [skill.yaml](skill.yaml) | 机器可读的元数据 |
+| [scripts/check-all.sh](scripts/check-all.sh) | 上游维护的一键总校验入口，包含增长、route-path 和 scenario 报告 |
 | [scripts/check-upstream-changes.sh](scripts/check-upstream-changes.sh) | 检查下游相关上游更新是否同步记录到 `UPSTREAM-CHANGES.md` |
 
 ---

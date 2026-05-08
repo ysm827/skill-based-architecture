@@ -27,6 +27,10 @@
 
 **English** | [中文](README.zh-CN.md)
 
+Skill-Based Architecture is a lifecycle framework for Agent rule systems. It turns scattered prompt documents into routable, verifiable, updatable engineering assets.
+
+It focuses on the rule system itself: structure, routing, workflows, validation, after-action learning, and upstream/downstream updates. It does not ship technology-specific rules by default; backend, frontend, deploy, and team-specific conventions belong in downstream project skills or examples.
+
 > A **meta-skill for turning scattered AI-agent rules into a maintainable project skill.** It audits rule sources such as `AGENTS.md`, `CLAUDE.md`, `.cursor/rules/`, README notes, and local workflow docs, then consolidates durable rules, repeatable workflows, and costly gotchas under `skills/<name>/`.
 
 **The output is a project rule system, not another README.** `SKILL.md` routes the task; `rules/` holds stable constraints; `workflows/` holds procedures; `references/` holds architecture notes and gotchas. Tool-specific entry files stay as thin compatibility shells that point agents to the right task path without duplicating rule bodies.
@@ -257,6 +261,7 @@ For Claude Code native skills, avoid generic project skill names that may collid
 | [EXAMPLES.md](EXAMPLES.md) | Stub + index — redirects to [`examples/`](examples/) |
 | [examples/](examples/) | Migration, project-type, self-evolution, and behavior-failure examples |
 | [skill.yaml](skill.yaml) | Machine-readable metadata for tool discovery |
+| [scripts/check-all.sh](scripts/check-all.sh) | One-command upstream maintenance suite, including growth, route-path, and scenario reports |
 | [scripts/check-upstream-changes.sh](scripts/check-upstream-changes.sh) | Guard that requires upstream change notes for downstream-facing updates |
 
 ---

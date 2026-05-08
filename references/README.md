@@ -7,6 +7,8 @@ The root [`REFERENCE.md`](../REFERENCE.md) used to be a single 683-line document
 | File | Covers | When to read |
 |---|---|---|
 | [layout.md](layout.md) | Recommended directory layout, `SKILL.md` template, project boundaries, multi-skill projects, Prompt/Context/Harness positioning | Starting a new skill or deciding where things belong |
+| [executable-skill-architecture.md](executable-skill-architecture.md) | Optional advanced shape for API/CLI/platform-operation skills with scripts, tools, capabilities, workflows, and local config | Profiling a project with external execution, side effects, or stable output contracts |
+| [scenario-testing.md](scenario-testing.md) | Unit/contract/golden/scenario testing layers for skill behavior, especially executable or high-risk routes | Designing validation beyond structural smoke tests |
 | [thin-shells.md](thin-shells.md) | `.cursor` registration entry, common thin-shell body, per-tool shell templates (AGENTS/CLAUDE/CODEX/GEMINI), tool compatibility matrix, SessionStart hook | Wiring a skill into a new harness or debugging silent activation |
 | [self-hosting-routing.yaml](self-hosting-routing.yaml) | Canonical YAML route manifest for this repo's root thin-shell bootstraps, plus sync/check protocol | Updating this repo's AGENTS/CLAUDE/CODEX/GEMINI/Cursor/Codex routing |
 | [protocols.md](protocols.md) | Meta-workflow templates, Task Closure Protocol, recording threshold (2/3), recording destination guide, generalization rule, when references alone are not enough, skill activation verification | Designing self-evolution behavior or deciding where to record a new lesson |

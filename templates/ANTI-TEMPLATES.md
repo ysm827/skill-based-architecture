@@ -40,6 +40,14 @@ Add the mechanism only if it replaces at least two repeated maintenance points, 
 - **Why rejected:** `fix-bug`, `add-feature`, `review`, and `update-docs` are usually procedures inside one project skill, not separate activation domains. Pre-building them as child skills turns one project rule system into competing descriptions that all share the same Always Read files.
 - **Where it should go:** `workflows/*.md` under the primary project skill. Split into multiple skills only when trigger language and rules genuinely diverge, such as app vs deploy vs data-migration.
 
+### Executable skill directories by default
+- **Why rejected:** `scripts/`, `tools/`, `capability/`, and `conf/.defaults/` are correct only for operation-heavy skills that call APIs/CLIs, run scripts, manage local config, or perform side effects. Pre-building them tells ordinary rule-only projects to maintain unused execution surfaces.
+- **Where it should go:** `references/executable-skill-architecture.md` and project-specific downstream skills that pass the executable-pressure test in `workflows/profile-project.md`.
+
+### Scenario test harness by default
+- **Why rejected:** scenario harnesses depend on the agent runtime, isolation model, mock strategy, and cost tolerance. A default harness would either bind the scaffold to one tool or become too vague to protect behavior.
+- **Where it should go:** `references/scenario-testing.md` as a recipe; downstream projects add their own harness only for high-risk routes.
+
 ### Trigger phrases in the `description` field
 - **Why rejected:** these are the single highest-value piece of project knowledge for skill activation, and they must come from real user language. A generic "This skill should be used when the user asks to 'do X'" trains the agent to never match.
 - **Language rule:** if users ask in Chinese or another non-English language, the quoted phrases must include that language. English-only examples are not neutral defaults for multilingual teams.

@@ -30,6 +30,72 @@ copy, create, or maintain a local version of this file.
 - Downstream refresh guidance: <what to compare/port/preserve>
 ```
 
+## 2026-05-08 - Architecture governance follow-through
+
+- Upstream commit: pending in this working tree
+- Changed areas: `templates/skill/workflows/profile-project.md`,
+  `references/layout.md`, `references/executable-skill-architecture.md`,
+  `references/scenario-testing.md`, `TEMPLATES-GUIDE.md`,
+  `references/protocols.md`, `templates/skill/workflows/update-rules.md`,
+  `templates/README.md`, `templates/skill/scripts/check-growth-health.sh`,
+  `templates/skill/scripts/audit-route-paths.sh`,
+  `scripts/check-self-scenarios.sh`, `scripts/check-all.sh`, `README.md`,
+  `README.zh-CN.md`, `skill.yaml`, and `UPSTREAM-CHANGES.md`
+- Why it matters: turns the architecture review into concrete governance:
+  project profiling now uses separate structure / execution / topology axes,
+  growth pressure is reported without failing by default, Task Closure has one
+  canonical source, references can be audited by route path, and the
+  self-hosting repo has minimal scenario checks for high-risk routing.
+- Downstream refresh guidance: port the three-axis `profile-project` changes
+  and the new report scripts if the downstream skill is starting to grow. Keep
+  `check-growth-health.sh` and `audit-route-paths.sh` report-first unless the
+  downstream project has stable thresholds. Do not copy
+  `scripts/check-self-scenarios.sh`; it is upstream self-hosting validation.
+
+## 2026-05-08 - Growth governance and executable skill guidance
+
+- Upstream commit: pending in this working tree
+- Changed areas: `references/executable-skill-architecture.md`,
+  `references/scenario-testing.md`, `references/README.md`,
+  `references/layout.md`, `references/protocols.md`, `TEMPLATES-GUIDE.md`,
+  `templates/skill/workflows/profile-project.md`,
+  `templates/skill/workflows/update-rules.md`,
+  `templates/skill/routing.yaml`, `templates/README.md`,
+  `templates/ANTI-TEMPLATES.md`, `scripts/check-upstream-changes.sh`, and
+  `UPSTREAM-CHANGES.md`
+- Why it matters: separates the lightweight core scaffold from optional
+  executable-skill growth paths, adds behavior-testing guidance, and gives
+  maintainers explicit growth-health triggers before templates or checks bloat.
+- Downstream refresh guidance: compare and port the new references and the
+  `profile-project` / `update-rules` workflow refinements when a downstream
+  project needs executable-skill classification or high-risk route validation.
+  Do not add `scripts/`, `tools/`, `capability/`, `conf/`, or a scenario harness
+  to existing downstream skills unless their project evidence passes the new
+  executable or scenario-testing gates.
+
+## 2026-05-07 - One-command upstream check suite
+
+- Upstream commit: see `git log -- scripts/check-all.sh` for the introducing
+  commit; this entry documents the check suite added by that same change
+- Changed areas: `scripts/check-all.sh`, `scripts/check-upstream-changes.sh`,
+  `templates/README.md`, `README.md`, `README.zh-CN.md`, `skill.yaml`, and
+  `UPSTREAM-CHANGES.md`
+- Why it matters: gives upstream maintainers a single command for the full
+  maintenance gate instead of relying on a remembered list of individual checks.
+- Downstream refresh guidance: do not copy this root script into downstream
+  projects. It is an upstream maintenance command; downstream projects keep
+  using their copied `skills/<name>/scripts/*` validation commands.
+
+## 2026-05-07 - README positioning statement
+
+- Upstream commit: see `git log -- README.md README.zh-CN.md` for the
+  introducing commit; this entry documents a README-only positioning change
+- Changed areas: `README.md`, `README.zh-CN.md`, and `UPSTREAM-CHANGES.md`
+- Why it matters: clarifies that this project is a lifecycle framework for
+  Agent rule systems, not a technology-specific rule library.
+- Downstream refresh guidance: no downstream refresh action is required unless
+  a downstream project mirrors upstream README wording intentionally.
+
 ## 2026-05-07 - Guard upstream change notes
 
 - Upstream commit: see `git log -- scripts/check-upstream-changes.sh` for the

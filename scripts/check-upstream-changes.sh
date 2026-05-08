@@ -19,11 +19,13 @@ pre-commit hook to verify only the pending commit.
 
 Watched areas:
   templates/**
+  references/**
   WORKFLOW.md
   TEMPLATES-GUIDE.md
   README.md
   README.zh-CN.md
   skill.yaml
+  scripts/check-all.sh
   scripts/check-upstream-changes.sh
 EOF
 }
@@ -66,11 +68,13 @@ fi
 is_watched() {
   case "$1" in
     templates/*) return 0 ;;
+    references/*) return 0 ;;
     WORKFLOW.md) return 0 ;;
     TEMPLATES-GUIDE.md) return 0 ;;
     README.md) return 0 ;;
     README.zh-CN.md) return 0 ;;
     skill.yaml) return 0 ;;
+    scripts/check-all.sh) return 0 ;;
     scripts/check-upstream-changes.sh) return 0 ;;
     *) return 1 ;;
   esac

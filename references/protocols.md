@@ -7,18 +7,13 @@ See [TEMPLATES-GUIDE.md](../TEMPLATES-GUIDE.md) for the full `update-rules.md` a
 
 ## Task Closure Protocol
 
-A task is NOT complete until these steps are done:
+Canonical source: [`templates/skill/workflows/update-rules.md`](../templates/skill/workflows/update-rules.md#task-closure-protocol).
 
-1. Main work done and verified; before final validation on long/interrupted tasks, restate the original request, chosen route, and forbidden shortcuts or run `protocol-blocks/reboot-check.md`
-2. 30-second AAR scan (all "no" = stop here)
-3. If any "yes" → apply recording threshold → apply generalization rule → record if it passes
-4. **Path integrity gate** — if any `.md` was touched, both must pass before commit from the project repo root unless noted:
-   - `bash "skills/<skill-name>/scripts/smoke-test.sh" "<skill-name>" --phase 8` (broken-link + structural checks)
-   - `(cd "skills/<skill-name>" && bash scripts/audit-references.sh --orphans)` (orphan inbound check; runs from skill root)
-5. If `rules/`/`references/` *meaning* changed, grep `workflows/` for stale reproductions and fix in same commit
-6. If the edit adds or changes an external vendor/tool/runtime fact, verify against a primary source, add or refresh `<!-- external-fact: verified=YYYY-MM-DD source=... -->`, and run `scripts/check-external-facts.sh`
-
-No workflow may skip step 2. Steps 3–6 fire conditionally and are mandatory when their trigger fires. See [TEMPLATES-GUIDE.md § Task Closure Protocol](../TEMPLATES-GUIDE.md#task-closure-protocol) for the full template.
+This reference deliberately gives only the operating summary: task closure
+means main-work verification, the 30-second AAR scan, and any triggered
+recording, path-integrity, route-path, cross-reference, behavior-validation, or
+external-fact checks. Keep the exact gate wording in `update-rules.md` so the
+protocol does not drift across guide/reference copies.
 
 ### AAR Scan Questions
 

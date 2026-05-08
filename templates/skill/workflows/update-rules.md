@@ -19,21 +19,20 @@ Threshold: if this change would cause someone to guess wrong on a similar task w
 > **The trigger table itself is a living document:** when you discover a new change-to-update mapping, add it to this table.
 
 ## Task Closure Protocol
-A task is NOT complete until all six gates are done:
-
+A task is NOT complete until all seven gates are done:
 1. **Main work + original-constraint check** — before final validation, restate the original request, chosen route, and forbidden shortcuts; if the task was long/interrupted and you cannot, run `protocol-blocks/reboot-check.md`, then verify/tests pass
 2. **30-second AAR scan** — run the checklist below; all "no" = stop here
 3. **Record if needed** — any "yes" → apply recording threshold → record if it passes
-4. **Path integrity gate** — if this task touched any `.md` file in skill structure, both checks below must pass *before commit*. Run these from the project repo root unless noted. Markdown links have no compile-time verification — agents partially update path references all the time, leaving dangling links that silently rot. These two scripts are the missing "type checker":
-   - `bash "skills/<skill-name>/scripts/sync-routing.sh" "<skill-name>" --check` — verifies generated Always Read lists, Common Tasks, and bootstraps still match `routing.yaml`
-   - `bash "skills/<skill-name>/scripts/smoke-test.sh" "<skill-name>" --phase 8` — verifies every relative markdown file link in every skill `.md` resolves to an existing file (Section 8: Broken Link Check), plus all earlier structural/routing/budget checks
-   - `(cd "skills/<skill-name>" && bash scripts/audit-references.sh --orphans)` — verifies no file in `rules/` or `references/` is unreachable from any inbound link (orphans = stored but never activated)
-   - Together they cover both directions of drift: broken outbound links (Section 8) and dangling inbound links (orphans)
-   - Fix every failure in the same commit as the edit that caused it, not "next task"
+4. **Path integrity gate** — if this task touched any `.md` file in skill structure, run these from the project repo root before commit; fix failures in the same commit:
+   - `bash "skills/<skill-name>/scripts/sync-routing.sh" "<skill-name>" --check` — generated Always Read, Common Tasks, and bootstraps match `routing.yaml`
+   - `bash "skills/<skill-name>/scripts/smoke-test.sh" "<skill-name>" --phase 8` — markdown links, structure, routing, and budgets still pass
+   - `(cd "skills/<skill-name>" && bash scripts/audit-references.sh --orphans)` — no `rules/` or `references/` file has zero inbound links
+   - `(cd "skills/<skill-name>" && bash scripts/audit-route-paths.sh .)` — report which routes activate each `rules/` or `references/` file; use `--strict` only after the project opts in
 5. **Cross-reference content sync** — if this task changed the *meaning* of a `rules/` or `references/` file (not just paths), grep `workflows/` for files that reproduce the changed invariant and update them in the same commit. Rule meaning drifts silently otherwise; a workflow that repeats a now-wrong invariant actively misleads.
-6. **External fact freshness** — if the edit adds or changes a claim about an external tool, framework, hosted service, API, model, CLI, or official behavior, verify against the primary source, add/refresh `<!-- external-fact: verified=YYYY-MM-DD source=https://official.example/docs -->`, then run `bash "skills/<skill-name>/scripts/check-external-facts.sh" .`. Project-internal facts do not need this marker.
+6. **Behavior validation fit** — if the edit adds or changes a high-risk route, non-idempotent workflow, executable script contract, or external skill handoff, decide whether a contract or scenario test is needed; structural smoke tests alone do not prove route behavior.
+7. **External fact freshness** — if the edit adds or changes a claim about an external tool, framework, hosted service, API, model, CLI, or official behavior, verify against the primary source, add/refresh `<!-- external-fact: verified=YYYY-MM-DD source=https://official.example/docs -->`, then run `bash "skills/<skill-name>/scripts/check-external-facts.sh" .`. Project-internal facts do not need this marker.
 
-No workflow may declare completion without step 2. Steps 3–6 fire conditionally (3 on AAR hits, 4 on any `.md` edit, 5 on rules/references *meaning* changes, 6 on external facts) and are mandatory when their trigger fires.
+No workflow may declare completion without step 2. Steps 3–7 fire conditionally (3 on AAR hits, 4 on any `.md` edit, 5 on rules/references *meaning* changes, 6 on high-risk behavior changes, 7 on external facts) and are mandatory when their trigger fires.
 
 ### Rationalizations to Reject
 

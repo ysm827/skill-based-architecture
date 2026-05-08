@@ -176,6 +176,53 @@ Under-structuring a growing skill:
 
 The tier table above is the concrete decision gate. Re-evaluate on each significant skill revision, not on every edit.
 
+## Executable Skill Pressure
+
+Do not treat skill shape as one flat choice. Profile it on three independent
+axes:
+
+| Axis | Values | Question |
+|---|---|---|
+| Structure tier | Single-file / Folder-light / Full | How much routing and durable documentation does the project need? |
+| Execution mode | Rule-only / Assisted-executable / Executable | Does the skill merely guide work, or does it own scripts, external calls, and output contracts? |
+| Domain topology | Single-skill / Multi-skill candidate | Do trigger language and rules form one domain or several separable domains? |
+
+A project can be `Full + Rule-only + Single-skill`, or
+`Folder-light + Executable + Single-skill`. Keep the axes separate so one
+pressure does not force unrelated structure.
+
+Some projects outgrow a rule-only skill because the skill must execute platform
+operations. Do not add operation directories by default. First profile the
+project with `workflows/profile-project.md`; if it has external APIs or CLIs,
+remote side effects, stable output contracts, repeated script logic, or local
+user config, evaluate the optional shape in
+[executable-skill-architecture.md](executable-skill-architecture.md).
+
+Keep the core scaffold light. `tools/`, `capability/`, `scripts/`, and
+`conf/.defaults/` belong only in downstream skills that have real executable
+pressure.
+
+## Simple Route vs Advanced Route
+
+Most routes need only `id`, `labels`, `route`, `required_reads`, `workflow`,
+and `trigger_examples`. Keep them simple.
+
+Use optional advanced fields only for high-risk routing where a wrong match has
+a real cost:
+
+| Field | Use for |
+|---|---|
+| `positive_signals` | High-signal phrases or structural evidence that should enter this route |
+| `negative_signals` | Nearby phrases that should route elsewhere or be refused |
+| `confidence` | HIGH/MEDIUM/LOW decision rules and when to clarify |
+| `slots` | Required inputs and where to derive or ask for them |
+| `target` | The exact capability, workflow, or external skill handoff |
+
+Typical advanced-route cases: deploys, database/schema changes, remote config
+writes, status transitions, external skill delegation, and expensive API calls.
+These fields are documentation and generation input; `sync-routing.sh` must stay
+compatible with routes that do not define them.
+
 ## Positioning: Prompt / Context / Harness
 
 Agent reliability lives on three layers. This skill is **not** a silver bullet — it acts on the second and a slice of the third.

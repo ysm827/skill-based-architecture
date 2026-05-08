@@ -70,48 +70,19 @@ Threshold: if this change would cause someone to guess wrong on a similar task w
 
 ## Task Closure Protocol
 
-A task is NOT complete until all six gates are done:
+Canonical source: [`templates/skill/workflows/update-rules.md`](templates/skill/workflows/update-rules.md#task-closure-protocol).
 
-1. **Main work + original-constraint check** — before final validation, restate the original request, chosen route, and forbidden shortcuts; if the task was long/interrupted and you cannot, run `protocol-blocks/reboot-check.md`, then verify/tests pass
-2. **30-second AAR scan** — run the checklist below; all "no" = stop here
-3. **Record if needed** — any "yes" → apply recording threshold → record if it passes
-4. **Path integrity gate** — if this task touched any `.md` file, both checks must pass *before commit*. Run these from the project repo root unless noted:
-   - `bash "skills/<skill-name>/scripts/smoke-test.sh" "<skill-name>" --phase 8` — verifies every relative `[text](path)` link resolves (Section 8: Broken Link Check) plus all earlier structural/routing/budget checks
-   - `(cd "skills/<skill-name>" && bash scripts/audit-references.sh --orphans)` — verifies no `rules/` or `references/` file is unreachable from any inbound link
-   - These together are the missing "compile-time" check for markdown links — partial path edits leave dangling references that rot silently otherwise
-5. **Cross-reference content sync** — if this task changed the *meaning* of a `rules/` or `references/` file (not just paths), grep `workflows/` for files that reproduce the changed invariant and update them in the same commit
-6. **External fact freshness** — if the edit adds or changes a claim about an external tool, framework, hosted service, API, model, CLI, or official behavior, verify against the primary source, add or refresh `<!-- external-fact: verified=YYYY-MM-DD source=https://official.example/docs -->`, then run `scripts/check-external-facts.sh`
+This guide intentionally does not restate the full seven gates. When the
+protocol changes, update `update-rules.md` first. Other files should link or
+summarize so they do not drift into parallel protocol definitions.
 
-No workflow may declare completion without step 2. Steps 3–6 fire conditionally (3 on AAR hits, 4 on any `.md` edit, 5 on rules/references meaning changes, 6 on external facts) and are mandatory when their trigger fires.
+The invariant is short: no non-trivial task is complete without main-work
+verification, a 30-second AAR scan, and any triggered path-integrity,
+route-path, cross-reference, behavior-validation, or external-fact checks.
 
-### Rationalizations to Reject
-
-When the Agent feels the urge to skip steps 2–6, these are the common excuses and their rebuttals. Every row was captured from a real pressure-test failure (see [WORKFLOW.md § Phase 9](WORKFLOW.md#phase-9-pressure-test-the-skill)) — do not argue with them, just refuse.
-
-| Rationalization | Reality |
-|---|---|
-| "This task was small — AAR is overkill" | Small tasks are where lessons hide. The AAR scan takes 30 seconds; skipping is slower than doing |
-| "I'll run AAR at the end of the session" | You will forget. The scan must happen at task closure, not batched |
-| "Nothing new happened, just a routine fix" | If nothing new happened, the scan returns "no" on all four questions in 30 seconds. Do it anyway |
-| "The user is in a hurry" | The protocol exists *because* hurry produces the worst pitfalls. Pressure is a reason to run AAR, not skip it |
-| "I already know this lesson, don't need to record" | Recording is for future agents, not past you. Current knowledge is not durable across context boundaries |
-| "This is covered by the existing rules" | Then the scan returns "no" in 10 seconds. Faster to run it than argue about it |
-| "I only renamed one file, links are probably fine" | Markdown links have zero compile-time verification — "probably fine" is exactly when drift accumulates. The check takes ~2 seconds; running it is faster than convincing yourself you don't need to |
-| "I'll run smoke-test once at the end of the session" | Same failure mode as batched AAR: by the time you remember, you can no longer attribute breakage to a specific edit. Path integrity is per-commit, not per-session |
-| "audit-references is just for orphans, my edit can't create orphans" | Wrong premise — deleting any inbound link can orphan a previously-linked file. The script runs in seconds; assumptions about what "can't" happen are how silent rot starts |
-| "The official docs probably haven't changed" | Volatile external behavior is exactly where stale rules come from. Refresh the primary source and update the `external-fact` date |
-
-### Red Flags — STOP
-
-If the Agent catches itself thinking any of the following, stop and run the full protocol:
-
-- "Just this once" — every skip erodes the protocol
-- "I'll fix it in the next task" — the next task will have its own closure
-- "Nobody will know I skipped" — the next pitfall will
-- "The AAR is for big changes" — scope does not determine value; novelty does
-- "This is overhead, not work" — Task Closure *is* the task; anything that ships without it is half-done
-
-> Reusable versions of these blocks live in [`templates/protocol-blocks/`](templates/protocol-blocks/) — drop them into any project workflow that needs reinforcement.
+Reusable reinforcement blocks live in
+[`templates/protocol-blocks/`](templates/protocol-blocks/). Drop them into
+workflows that need extra pressure against skipped closure.
 
 ## After-Action Review
 

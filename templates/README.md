@@ -22,6 +22,8 @@ templates/
 │       ├── check-description-routing.sh (description scope + multi-skill overlap checks)
 │       ├── check-cross-references.sh    (workflows → rules/references staleness heuristic)
 │       ├── check-external-facts.sh      (source-date freshness check for volatile external facts)
+│       ├── check-growth-health.sh       (non-blocking growth pressure report)
+│       ├── audit-route-paths.sh         (route-to-reference activation path report)
 │       └── audit-references.sh          (orphan + low-inbound detection for rules/ and references/)
 ├── shells/                   → becomes repo-root entry files
 │   ├── AGENTS.md / CLAUDE.md / CODEX.md / GEMINI.md
@@ -77,7 +79,11 @@ Two kinds — each with a different "fill" mechanism:
 | `skill/workflows/update-rules.md`, `maintain-docs.md`, `subagent-driven.md` | ≤ 250 lines | Protocol-heavy workflows allowed more room |
 | `protocol-blocks/*` | ≤ 40 lines each | One idea per block |
 | `skill/SKILL.md.template` | ≤ 100 lines | Same hard cap as downstream SKILL.md; keep shorter when possible, but do not create a stricter template-only budget that conflicts with smoke-test |
+| `skill/scripts/smoke-test.sh` | ≤ 800 lines | Structural test harness; keep scenario behavior out of this script |
+| `skill/scripts/test-trigger.sh` | ≤ 360 lines | Trigger-rate helper; split if it starts owning routing policy |
 | `skill/scripts/sync-routing.sh` | ≤ 320 lines | Generator/checker for routing.yaml-derived blocks; keep dependency-free |
+| `skill/scripts/audit-route-paths.sh` | ≤ 280 lines | Report route-to-reference activation paths; keep it report-first unless a project opts into strict mode |
+| `skill/scripts/check-growth-health.sh` | ≤ 220 lines | Non-blocking pressure report for line counts, route counts, and script/workflow budgets |
 | `skill/scripts/check-description-routing.sh` | ≤ 160 lines | Conservative semantic guard for description scope and multi-skill trigger overlap |
 | `skill/scripts/check-external-facts.sh` | ≤ 120 lines | Small freshness gate; keep network-free and marker-based |
 | `skill/references/gotchas.md` | ≤ 25 lines (seed) | MUST stay near-empty — content grows post-deployment |
@@ -85,6 +91,26 @@ Two kinds — each with a different "fill" mechanism:
 | `migration/*.sh` | ≤ 200 lines | Bridge scripts; past this, refactor into libraries |
 
 Anything over budget needs either splitting or rejection. See `ANTI-TEMPLATES.md`.
+
+## Growth Health
+
+Review these signals during major template or skill updates. A threshold does
+not force an automatic refactor; it forces an explicit decision.
+
+| Signal | Review when | Default action |
+|---|---:|---|
+| `SKILL.md` line count | > 100 | Move detail to routed files or downgrade scope |
+| Always Read files | > 3 | Demote domain-specific files to task routes |
+| Concrete routes | > 10 | Group routes, merge low-frequency tasks, or evaluate multi-skill split |
+| `references/` orphans | > 0 | Add an activation path or delete the reference |
+| Workflow line count | > budget row above | Split only if sections are independently navigable |
+| Check script line count | > budget row above | Extract checks or reject new mechanism weight |
+| High-risk route scenarios | 0 covered | Add contract/scenario tests before trusting behavior |
+
+Executable-skill pressure is a separate signal: if project evidence shows
+external APIs/CLIs, remote side effects, repeated script logic, local config, or
+stable output contracts, read `references/executable-skill-architecture.md`
+before expanding the base template.
 
 ## The "Would Two Real Projects Disagree?" Test
 
@@ -103,10 +129,11 @@ New reusable mechanisms must also pass the [Mechanism Admission Gate](ANTI-TEMPL
 
 Run these when templates change:
 
-1. **Byte budget CI** — a 5-line shell script that fails if any file exceeds its row in the budget table above.
+1. **Growth health report** — run `bash templates/skill/scripts/check-growth-health.sh .`; WATCH/REVIEW rows force an explicit decision, but do not fail by default.
 2. **Placeholder audit** — `grep -r '{{' templates/` lists every placeholder; must match the `sed` substitution set in WORKFLOW.md Quick Start (no orphans).
 3. **Loader-safety audit** — `find templates -name 'SKILL.md'` must return no rows; template sources use `SKILL.md.template` until Quick Start materializes them downstream.
 4. **FILL audit** — `grep -r 'FILL:' templates/` must return expected lines for judgment-filled templates (`rules/`, `references/gotchas.md`, `SKILL.md.template`, `routing.yaml`, project-specific workflow comments). Thin shells may rely on mechanical placeholders / generated markers instead of `FILL:`.
 5. **Routing manifest audit** — run `bash templates/skill/scripts/sync-routing.sh templates/skill --check`; then instantiate a sample, fill `routing.yaml`, run `bash skills/<name>/scripts/sync-routing.sh <name> --check`; generated Always Read lists, summaries, and bootstraps must match.
-6. **Homogeneity spot-check** — run Quick Start against two toy projects of very different types (Go CLI + Next.js site) and `diff -r` the output. Skeleton files should be near-identical; `rules/`, `gotchas.md`, `routing.yaml`, `SKILL.md` Always Read + Common Tasks must **not** be identical. If they are, the template overreached.
-7. **Upstream change-note gate** — run `bash scripts/check-upstream-changes.sh` from this upstream repo. If downstream-facing upstream files changed, the same diff must update `UPSTREAM-CHANGES.md`; if there is no downstream refresh impact, record that explicitly there.
+6. **Route-path audit** — run `bash skills/<name>/scripts/audit-route-paths.sh <name>` to report which routes can activate each `rules/` and `references/` file. Start report-only; opt into `--strict` only after the project has stable route coverage.
+7. **Homogeneity spot-check** — run Quick Start against two toy projects of very different types (Go CLI + Next.js site) and `diff -r` the output. Skeleton files should be near-identical; `rules/`, `gotchas.md`, `routing.yaml`, `SKILL.md` Always Read + Common Tasks must **not** be identical. If they are, the template overreached.
+8. **Upstream check suite** — run `bash scripts/check-all.sh` from this upstream repo. At minimum it includes the upstream change-note gate: if downstream-facing upstream files changed, the same diff must update `UPSTREAM-CHANGES.md`; if there is no downstream refresh impact, record that explicitly there.
