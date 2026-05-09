@@ -3,7 +3,12 @@
 
 ## Meta-Workflow Templates
 
-See [TEMPLATES-GUIDE.md](../TEMPLATES-GUIDE.md) for the full `update-rules.md` and `maintain-docs.md` templates that every project should include. These cover rule sync, after-action review, recording thresholds, rule deprecation, file health checks, and split/merge procedures.
+The canonical workflow templates live under `templates/skill/workflows/`. Every project should adopt at least these:
+
+- [`update-rules.md`](../templates/skill/workflows/update-rules.md) — shared exit gate; covers rule sync, AAR, recording threshold, rule deprecation, post-update health check.
+- [`maintain-docs.md`](../templates/skill/workflows/maintain-docs.md) — file health check, split, merge, and reference integrity.
+
+For a higher-level orientation and the minimal starter scaffold, see [`TEMPLATES-GUIDE.md`](../TEMPLATES-GUIDE.md).
 
 ## Task Closure Protocol
 
@@ -83,7 +88,7 @@ Records must be reusable knowledge, not project-specific narratives. Before writ
 
 Pattern: `specific finding → abstract as general pattern → state consequence of not following it`
 
-See [TEMPLATES-GUIDE.md § Generalization Rule](../TEMPLATES-GUIDE.md#generalization-rule) for examples of good vs bad records.
+For worked examples of good vs bad records, see [`templates/skill/workflows/update-rules.md`](../templates/skill/workflows/update-rules.md) (the canonical Generalization Rule section).
 
 ## When References Alone Are Not Enough
 

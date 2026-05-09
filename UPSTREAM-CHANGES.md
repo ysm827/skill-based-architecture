@@ -30,6 +30,98 @@ copy, create, or maintain a local version of this file.
 - Downstream refresh guidance: <what to compare/port/preserve>
 ```
 
+## Archive Policy
+
+Downstream refresh agents almost always only read the most recent 3–5 entries. Old entries cost them context without changing decisions. When this file passes ~300 lines (or roughly 8 entries), move the oldest entries to `UPSTREAM-CHANGES-archive.md` and keep only the most recent 3–5 here.
+
+The archive file has the same format and is read on demand if a downstream agent is investigating a specific historical change. `scripts/check-upstream-changes.sh` only enforces a same-diff entry in `UPSTREAM-CHANGES.md`; archived entries are out of its scope.
+
+## 2026-05-09 - Bloat reduction across templates, references, examples, READMEs
+
+- Upstream commit: pending in this working tree
+- Changed areas: 33 files. Deletions:
+  `templates/migration/` (entire dir — `migrate.sh`, `resume.sh`, README),
+  `templates/checklists/post-migration.md`,
+  `templates/protocol-blocks/iron-law-header.md`,
+  `templates/shells/.codex/instructions.md`, `.codex/instructions.md` (root),
+  `examples/{migration,project-types,self-evolution,README}.md`.
+  Major slims: `WORKFLOW.md` (-160 lines, removed migration FSM),
+  `README.md` + `README.zh-CN.md` (-296 lines combined),
+  `references/layout.md` (-167 lines, split out three new files),
+  `references/thin-shells.md` (-141 lines, per-tool moved out).
+  New references: `references/{progressive-rigor,positioning,per-tool-shells}.md`.
+  Major rewrite: `EXAMPLES.md` (now consolidated body, was a stub).
+  Mechanism updates: `scripts/sync-self-routing.sh` and
+  `templates/skill/scripts/sync-routing.sh` no longer generate
+  `.codex/instructions.md`; `smoke-test.sh` makes `.codex/instructions.md`
+  optional instead of required; `examples/README.md` route in
+  `references/self-hosting-routing.yaml` repointed to `EXAMPLES.md` +
+  `examples/behavior-failures.md`.
+  Net: +476 / −2117 lines.
+- Why it matters: removed mechanisms that solved problems that don't
+  recur — the migration state machine for crashes that don't happen, the
+  duplicate Codex shell for harnesses that all read `AGENTS.md`, four
+  long examples files that no route ever activated, the reusable
+  `iron-law-header` block that was referenced once. Split two oversized
+  references (`layout.md`, `thin-shells.md`) so routing pulls only the
+  relevant subsection. The architecture's own "small focused files"
+  principle now applies to itself.
+- Downstream refresh guidance: when running `update-upstream`, expect to
+  delete several files in your downstream skill if you scaffolded from a
+  prior upstream:
+  - Delete `skills/$NAME/.codex/instructions.md` if your harness does not
+    explicitly read it (most don't — `AGENTS.md` is canonical).
+    `smoke-test.sh` no longer requires it.
+  - If your downstream copied `templates/migration/`, `templates/checklists/`,
+    or `templates/protocol-blocks/iron-law-header.md`, remove them — they
+    are no longer maintained upstream.
+  - Old long-form example files were consolidated into root `EXAMPLES.md`.
+    `examples/behavior-failures.md` is the only example file kept.
+  - For inbound links to former `references/layout.md` sections,
+    repoint: `#progressive-rigor` → `progressive-rigor.md`,
+    `#multi-skill-projects` → `multi-skill-routing.md` (Coexistence rules),
+    Positioning section → `positioning.md`.
+  - For inbound links to former `references/thin-shells.md § Per-Tool …`,
+    repoint to `references/per-tool-shells.md`.
+
+## 2026-05-09 - Wire conformance into the check suite + self-hosting parity
+
+- Upstream commit: pending in this working tree
+- Changed areas: `scripts/check-all.sh`,
+  `templates/skill/workflows/update-upstream.md`,
+  `references/self-hosting-conformance.yaml` (new),
+  `references/README.md`, `scripts/README.md`, `UPSTREAM-CHANGES.md`
+- Why it matters: closes three follow-on gaps that were left by the previous
+  conformance commit:
+  1. The conformance check shipped without being wired into `check-all.sh` —
+     it was a "stored but not activated" tool (Pitfall #4 in `SKILL.md`).
+     Now `check-all.sh` runs both the template manifest and the new
+     self-hosting manifest before commit/push.
+  2. The downstream `update-upstream` workflow ran the local
+     `conformance.yaml` (a snapshot from initial scaffold), which silently
+     re-validates against an old contract whenever upstream bumps required
+     sections. The workflow now mandates running the check against
+     `$tmp/upstream/templates/skill/conformance.yaml` (the live upstream
+     contract) and only after passing may the local manifest be overwritten
+     as a mechanism-owned file.
+  3. The upstream repo itself was outside the conformance net — it is
+     self-hosting and has no `workflows/` folder, so the template manifest
+     could not validate it. The new
+     `references/self-hosting-conformance.yaml` asserts the upstream's
+     canonical files (`SKILL.md`, `WORKFLOW.md`, `TEMPLATES-GUIDE.md`,
+     `references/protocols.md`) still teach the protocols its templates
+     promise downstream — Task Closure Protocol, AAR, Recording Threshold,
+     Activation Check, Generalization Rule, Progressive Rigor, etc.
+  Additionally `scripts/README.md` now carries a Check Suite Matrix so
+  maintainers can answer "which check covers which gap" without reading
+  every script header.
+- Downstream refresh guidance: when running `update-upstream`, follow the
+  updated step 9 (run conformance against the upstream clone's manifest, not
+  the local one). Treat `conformance.yaml` and `_parse_conformance.py` as
+  mechanism-owned — overwrite them from upstream after a successful refresh.
+  Do NOT copy `references/self-hosting-conformance.yaml` or `check-all.sh`
+  into downstream projects; they are upstream-only maintenance assets.
+
 ## 2026-05-09 - Content conformance manifest + check script
 
 - Upstream commit: pending in this working tree
@@ -81,105 +173,6 @@ copy, create, or maintain a local version of this file.
   downstream project has stable thresholds. Do not copy
   `scripts/check-self-scenarios.sh`; it is upstream self-hosting validation.
 
-## 2026-05-08 - Growth governance and executable skill guidance
+---
 
-- Upstream commit: pending in this working tree
-- Changed areas: `references/executable-skill-architecture.md`,
-  `references/scenario-testing.md`, `references/README.md`,
-  `references/layout.md`, `references/protocols.md`, `TEMPLATES-GUIDE.md`,
-  `templates/skill/workflows/profile-project.md`,
-  `templates/skill/workflows/update-rules.md`,
-  `templates/skill/routing.yaml`, `templates/README.md`,
-  `templates/ANTI-TEMPLATES.md`, `scripts/check-upstream-changes.sh`, and
-  `UPSTREAM-CHANGES.md`
-- Why it matters: separates the lightweight core scaffold from optional
-  executable-skill growth paths, adds behavior-testing guidance, and gives
-  maintainers explicit growth-health triggers before templates or checks bloat.
-- Downstream refresh guidance: compare and port the new references and the
-  `profile-project` / `update-rules` workflow refinements when a downstream
-  project needs executable-skill classification or high-risk route validation.
-  Do not add `scripts/`, `tools/`, `capability/`, `conf/`, or a scenario harness
-  to existing downstream skills unless their project evidence passes the new
-  executable or scenario-testing gates.
-
-## 2026-05-07 - One-command upstream check suite
-
-- Upstream commit: see `git log -- scripts/check-all.sh` for the introducing
-  commit; this entry documents the check suite added by that same change
-- Changed areas: `scripts/check-all.sh`, `scripts/check-upstream-changes.sh`,
-  `templates/README.md`, `README.md`, `README.zh-CN.md`, `skill.yaml`, and
-  `UPSTREAM-CHANGES.md`
-- Why it matters: gives upstream maintainers a single command for the full
-  maintenance gate instead of relying on a remembered list of individual checks.
-- Downstream refresh guidance: do not copy this root script into downstream
-  projects. It is an upstream maintenance command; downstream projects keep
-  using their copied `skills/<name>/scripts/*` validation commands.
-
-## 2026-05-07 - README positioning statement
-
-- Upstream commit: see `git log -- README.md README.zh-CN.md` for the
-  introducing commit; this entry documents a README-only positioning change
-- Changed areas: `README.md`, `README.zh-CN.md`, and `UPSTREAM-CHANGES.md`
-- Why it matters: clarifies that this project is a lifecycle framework for
-  Agent rule systems, not a technology-specific rule library.
-- Downstream refresh guidance: no downstream refresh action is required unless
-  a downstream project mirrors upstream README wording intentionally.
-
-## 2026-05-07 - Guard upstream change notes
-
-- Upstream commit: see `git log -- scripts/check-upstream-changes.sh` for the
-  introducing commit; this entry documents the check added by that same change
-- Changed areas: `scripts/check-upstream-changes.sh`, `UPSTREAM-CHANGES.md`,
-  `WORKFLOW.md`, `README.md`, `README.zh-CN.md`, `skill.yaml`, and
-  `templates/README.md`
-- Why it matters: prevents downstream-facing upstream changes from landing
-  without an update note for future downstream refresh agents.
-- Downstream refresh guidance: do not copy this root script into downstream
-  projects. It is an upstream maintenance guard; downstream agents only read
-  the resulting `UPSTREAM-CHANGES.md` from a cloned upstream repo.
-
-## 2026-05-07 - Upstream change notes for downstream refreshes
-
-- Upstream commit: see `git log -- UPSTREAM-CHANGES.md` for the introducing
-  commit; this entry documents the mechanism added by that same change
-- Changed areas: `UPSTREAM-CHANGES.md`, `WORKFLOW.md`, `README.md`,
-  `README.zh-CN.md`, `skill.yaml`, and
-  `templates/skill/workflows/update-upstream.md`
-- Why it matters: gives downstream refresh agents an upstream-owned update map
-  to read before they inspect actual file diffs.
-- Downstream refresh guidance: port the updated `update-upstream` workflow if a
-  downstream project should read upstream notes first. Do not copy, create, or
-  update `UPSTREAM-CHANGES.md` in downstream projects; read it from the cloned
-  upstream repo during refresh.
-
-## 2026-05-07 - README branding and planning workflow hooks
-
-- Upstream commit: `12db598 Add README branding and planning workflow hooks`
-- Changed areas: `README.md`, `README.zh-CN.md`, `WORKFLOW.md`,
-  `references/thin-shells.md`, `templates/README.md`,
-  `templates/checklists/post-migration.md`, `templates/hooks/*`,
-  `templates/skill/SKILL.md.template`, `templates/skill/routing.yaml`,
-  `templates/skill/workflows/plan-feature.md`, and
-  `assets/skill-based-architecture-title.png`
-- Why it matters: adds the README title asset and project badges, introduces
-  the reusable `plan-feature` workflow/route, and adds the `workflow-state`
-  hook so long-running work can surface the active workflow state.
-- Downstream refresh guidance: compare hook files, routing, SKILL summary, and
-  workflow scaffolding as mechanism-owned changes. Preserve downstream
-  project-specific routes, examples, rules, gotchas, and workflow text unless
-  the upstream change fixes a reusable mechanism.
-
-## 2026-04-30 - Routing manifests and upstream refresh workflow
-
-- Upstream commit: `9cc9e56 Add routing manifests and upstream refresh workflow`
-- Changed areas: `templates/skill/routing.yaml`,
-  `templates/skill/workflows/update-upstream.md`,
-  `templates/skill/scripts/sync-routing.sh`,
-  root/self-hosting routing references, and generated shell bootstraps
-- Why it matters: makes `routing.yaml` the source of truth for generated Always
-  Read lists, Common Tasks, trigger examples, required reads, workflows, and
-  thin-shell bootstraps; introduces the agent-led upstream refresh workflow.
-- Downstream refresh guidance: port the routing source-of-truth mechanism and
-  `update-upstream` workflow when missing. Regenerate generated sections from
-  local `routing.yaml`; do not hand-edit shell bootstraps or overwrite
-  downstream task examples.
+Older entries (2026-05-08 through 2026-04-30) archived to [`UPSTREAM-CHANGES-archive.md`](UPSTREAM-CHANGES-archive.md).

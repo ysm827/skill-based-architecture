@@ -15,7 +15,7 @@ tasks:
     required_reads:
       - SKILL.md
       - WORKFLOW.md
-    workflow: WORKFLOW.md#quick-start-copy-dont-generate
+    workflow: WORKFLOW.md#quick-start
     trigger_examples:
       - 把规则迁移到 skills 目录
       - 整理项目规则
@@ -66,8 +66,9 @@ tasks:
       en: Add an example
       zh: 新增示例
     required_reads:
-      - examples/README.md
-    workflow: examples/README.md
+      - EXAMPLES.md
+      - examples/behavior-failures.md
+    workflow: EXAMPLES.md
     trigger_examples:
       - 加一个 before after 示例
       - 补一个行为失败例子
