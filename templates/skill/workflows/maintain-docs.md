@@ -34,12 +34,17 @@ Accumulation rot is not limited to gotchas. Check **every** file under `skills/{
 | `rules/*.md` | > 25 bullet-level rules in one file | Evaluate: are any duplicates? Any obsolete after recent changes? |
 | `references/*.md` (non-gotchas) | > 40 entries | Evaluate: can entries be grouped under better H2/H3 sections? |
 
-For each file that exceeds the trigger:
+For each file that exceeds the trigger, do these passes **in order** — they form a "categorize before splitting" pipeline so you do not split prematurely:
 
-1. **Dedup scan** — search for entries that say the same thing in different words. Use `**[topic]**` tags to cluster related entries quickly: `grep -oP '\*\*\[([^\]]+)\]' <file>` lists all topics; duplicate topics in the same file are the first place to look. Merge into one entry keeping the clearest wording.
+1. **Dedup scan (always first)** — surface real duplicates before any reorganization.
+   - Exact-heading duplicates: `grep "^## " <file> | sort | uniq -d` lists every `##` heading that appears more than once. Same heading recorded twice = same entry copy-pasted; merge or delete one.
+   - Topic-tag duplicates: `grep -oP '\*\*\[([^\]]+)\]' <file> | sort | uniq -c | sort -rn` lists `**[topic]**` tag frequency; tags with high counts are merge candidates.
+   - Smoke-test (`smoke-test.sh § 2a`) fails on exact-heading duplicates inside `gotchas.md` / `*pitfall*.md` automatically.
 2. **Staleness scan** — are any entries about technology/patterns that have since been removed from the project? Delete stale entries or mark `<!-- DEPRECATED: reason, YYYY-MM -->`.
-3. **Structural scan** — are entries grouped under meaningful headings, or piled at the bottom? Re-anchor orphan entries under the correct H2/H3 section.
-4. **Tag audit** — do entries carry `**[topic]**` tags? If a file has > 50% untagged entries, tag them during this pass to make the next scan faster.
+3. **Categorize (before splitting)** — if a file still has > 10 entries after dedup, group them under H2 categories before considering a split. Promote frequent `**[topic]**` tags to `## CategoryName` headings; rename individual entries from `## **[topic]** title` to `### **[topic]** title` under the right category. This usually buys you another 2-3× growth before a physical split is needed, and makes future dedup scans O(category) instead of O(file).
+4. **Structural scan** — after categorizing, re-anchor any remaining orphan entries under the correct H2 section.
+5. **Tag audit** — do all entries carry `**[topic]**` tags? If > 50% are untagged, tag them in this same pass while attention is on the file.
+6. **Split (last resort)** — only after dedup + categorize. Split when a single H2 category itself crosses the entry/line trigger, or when categories have genuinely different audiences (e.g. backend rules vs. frontend rules). Each resulting file should still be ≥ 30 lines after split (otherwise merge candidates).
 
 ## Step 1c: External Fact Freshness
 

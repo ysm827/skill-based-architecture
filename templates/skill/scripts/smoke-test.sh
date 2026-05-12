@@ -15,6 +15,7 @@
 #                                   Cursor registration entry, thin shells exist
 #   2. Line Count Budgets         — SKILL.md dual budget (description ≤ 25 + body ≤ 90), shells ≤ 60 lines,
 #                                   gotchas/pitfall ≤ $GOTCHAS_MAX_LINES (default 400),
+#                                   no duplicate ## headings in gotchas/pitfall files,
 #                                   Common Tasks ≤ $COMMON_TASKS_MAX_ROWS rows
 #                                   (default 10) — both env-overridable
 #   3. Placeholder Residue        — no {{NAME}} / {{SUMMARY}} leftover;
@@ -325,9 +326,27 @@ check_lines "$CURSOR_ENTRY" 60 "Cursor entry"
 # or deprecate stale entries". A fresh migration has a near-empty gotchas.md
 # (well under the cap); this fails only after accumulation without pruning. See
 # workflows/update-rules.md § Rule Deprecation and scripts/audit-references.sh.
+#
+# Also fails on exact-duplicate `## ` headings within a single gotchas/pitfall
+# file. Duplicate H2 headings (same heading text appearing 2+ times) signal
+# copy-paste recurrence — the entry was added a second time without dedup
+# scan, which is the literal failure mode `maintain-docs.md § Step 1b` exists
+# to prevent. This is a deterministic check (string equality on heading text)
+# with very low false-positive rate.
 for gotcha_file in "$SKILL_DIR/references"/*gotcha*.md "$SKILL_DIR/references"/*pitfall*.md; do
   [[ -f "$gotcha_file" ]] || continue
   check_lines "$gotcha_file" "$GOTCHAS_MAX_LINES" "$(basename "$gotcha_file") (pitfall log)"
+  DUPLICATE_HEADINGS=$(grep "^## " "$gotcha_file" | sort | uniq -d)
+  if [[ -n "$DUPLICATE_HEADINGS" ]]; then
+    fail "$(basename "$gotcha_file") has duplicate ## headings — same entry recorded twice"
+    echo "$DUPLICATE_HEADINGS" | head -5 | sed 's/^/       duplicate: /'
+    DUP_COUNT=$(echo "$DUPLICATE_HEADINGS" | wc -l | tr -d ' ')
+    if [[ "$DUP_COUNT" -gt 5 ]]; then
+      echo "       … and $((DUP_COUNT - 5)) more duplicate(s)"
+    fi
+  else
+    pass "$(basename "$gotcha_file"): no duplicate ## headings"
+  fi
 done
 
 # 2b. Common Tasks row count — per-task routing efficiency, not disk size.

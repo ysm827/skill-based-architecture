@@ -36,6 +36,44 @@ Downstream refresh agents almost always only read the most recent 3–5 entries.
 
 The archive file has the same format and is read on demand if a downstream agent is investigating a specific historical change. `scripts/check-upstream-changes.sh` only enforces a same-diff entry in `UPSTREAM-CHANGES.md`; archived entries are out of its scope.
 
+## 2026-05-11 - Gotchas dedup check + classification upgrade path
+
+- Upstream commit: pending in this working tree
+- Changed areas: `templates/skill/scripts/smoke-test.sh`,
+  `templates/skill/references/gotchas.md`,
+  `templates/skill/workflows/maintain-docs.md`,
+  `UPSTREAM-CHANGES.md`
+- Why it matters: real-data audit of a downstream chaos_web pitfall log
+  surfaced two problems the existing architecture did not catch:
+  1. **Copy-paste duplicate entries**. The file had 4 entries whose `##`
+     heading text matched another entry verbatim — same pitfall recorded
+     twice because the author had no quick way to see "did I write this
+     already?". The previous gotchas check only enforced line count,
+     not duplicates. `smoke-test.sh § 2a` now grep-dedups `## ` headings
+     in `gotchas.md` / `*pitfall*.md` and fails when any heading appears
+     more than once. Deterministic check, very low false-positive rate.
+  2. **No classification upgrade path**. The template `gotchas.md` told
+     authors how to write one entry but said nothing about how to keep
+     50 entries scannable. By the time a real file hits 25+ entries
+     with no organization, finding "is this already recorded?" is O(file)
+     and duplicates appear (see point 1). The template comment now
+     teaches a three-stage upgrade: stage 1 flat with `**[topic]**` tags
+     (≤ 10 entries), stage 2 H2 categories with `###` entries (10–25),
+     stage 3 split files (> 25 or > 400 lines). `maintain-docs.md
+     Step 1b` was reordered to enforce the same pipeline: dedup →
+     staleness → **categorize before splitting** → structural → tag →
+     split as last resort. Result: existing files reorganize before
+     splitting prematurely, and new files start with the right structural
+     instinct.
+- Downstream refresh guidance: pull the updated `scripts/smoke-test.sh`,
+  `references/gotchas.md` (template-side; **do not overwrite a downstream
+  copy that already has real entries**, just port the new comment block
+  to it), and `workflows/maintain-docs.md` as mechanism-owned files.
+  After the refresh, run `smoke-test.sh <name>` — if you have copy-paste
+  duplicates in your gotchas/pitfall files, the new check will list them
+  and you can dedup in one pass. If your gotchas file is > 10 entries,
+  follow `maintain-docs.md § Step 1b` to categorize before any split.
+
 ## 2026-05-09 - SKILL.md dual budget + test-trigger per-source rates
 
 - Upstream commit: pending in this working tree
