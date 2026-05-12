@@ -90,17 +90,34 @@ Before recording a potential new piece of knowledge, ask:
 
 ### Search Before Record (mandatory)
 
-Before writing anything new, search existing docs for the same or similar lesson:
+Before writing anything new, search existing docs for the same or similar lesson. This is Tier 1 of the maintenance trigger discipline (see `maintain-docs.md § Step 1b` for the full tier table). It is cheap because the agent already has the new entry's content and context in hand — a targeted scan of 3–5 candidate entries is far cheaper than reading the whole file.
+
+**General search** (any docs):
 
 ```bash
 grep -ri "<key concept>" skills/<name>/rules/ skills/<name>/references/ skills/<name>/workflows/
 ```
 
+**Gotchas/pitfall-specific scan** (when about to append to `references/gotchas.md` or `references/*pitfall*.md`):
+
+```bash
+# 1. List existing topic tags — promote/reuse rather than invent
+grep -oP '\*\*\[([^\]]+)\]' <file> | sort | uniq -c | sort -rn | head -10
+
+# 2. List existing ## / ### headings — surface near-duplicate titles
+grep -E '^#{2,3} ' <file>
+
+# 3. For each likely-matching heading, read the surrounding 10–20 lines
+#    DO NOT read the whole file just for a similarity check.
+```
+
+Decision tree:
+
 - **Exact match found** → stop. The lesson already exists. If the existing entry is incomplete, **update it in place** rather than adding a new one.
-- **Similar but different angle found** → **merge into the existing entry**, adding the new angle. Do not create a parallel entry with different wording for the same lesson.
+- **Similar but different angle found** → **merge into the existing entry**, adding the new angle as another paragraph or bullet. Do not create a parallel entry with different wording for the same lesson.
 - **No match found** → proceed to "Where To Record" below.
 
-This step prevents the most common form of knowledge rot: the same lesson recorded 3 times in 3 different wordings across 3 files.
+This step prevents the most common form of knowledge rot: the same lesson recorded 3 times in 3 different wordings across 3 files. Smoke-test (`§ 2a`) catches the lazy case (verbatim duplicate `## ` heading); this Search step catches the harder case (near-duplicate phrased differently) at the cheapest moment to catch it.
 
 ### Where To Record
 

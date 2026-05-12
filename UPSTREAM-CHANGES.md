@@ -36,6 +36,40 @@ Downstream refresh agents almost always only read the most recent 3–5 entries.
 
 The archive file has the same format and is read on demand if a downstream agent is investigating a specific historical change. `scripts/check-upstream-changes.sh` only enforces a same-diff entry in `UPSTREAM-CHANGES.md`; archived entries are out of its scope.
 
+## 2026-05-11 - Tiered maintenance triggers (bash gate / AAR scan / full pass)
+
+- Upstream commit: pending in this working tree
+- Changed areas: `templates/skill/workflows/update-rules.md`,
+  `templates/skill/workflows/maintain-docs.md`, `UPSTREAM-CHANGES.md`
+- Why it matters: agent-led file cleanup costs tokens. Running the full
+  reorganization scan on every commit, or every time anyone touches a
+  gotchas file, would burn tokens without proportional benefit. The
+  workflow now articulates a three-tier trigger discipline so the
+  expensive scan runs only when cheap signals have already flagged
+  something:
+    - Tier 0 (bash, free, every commit): smoke-test `grep | uniq -d` on
+      `gotchas.md` / `*pitfall*.md` `##` headings — catches verbatim
+      copy-paste duplicates deterministically.
+    - Tier 1 (agent, cheap, on every AAR closure that records a new
+      entry): `update-rules.md § Search Before Record` upgraded to
+      include a gotchas-specific scan recipe — list existing tags + ##
+      headings via grep, then have the agent read 3–5 candidate entries
+      and decide append / merge / skip. Cheap because the agent is
+      already in context and only reads the candidate set, not the whole
+      file.
+    - Tier 2 (agent, expensive, threshold-triggered): full
+      reorganization (dedup + categorize + split if needed). Only fires
+      when entry count > 25, line count > 80% of cap, a recurring Tier-0
+      dup signals drift, or the user explicitly asks. Expected cadence is
+      "once or twice per file per year", not "every commit".
+  `maintain-docs.md § Step 1b` was rewritten to make these triggers
+  explicit (table + trigger list + token-cost intuition).
+- Downstream refresh guidance: pull the updated `workflows/update-rules.md`
+  and `workflows/maintain-docs.md` as mechanism-owned files. The Search
+  Before Record block in `update-rules.md` now mandates the gotchas
+  similarity scan at append time — agents already in AAR context should
+  run the cheap grep recipe before appending to any pitfall file.
+
 ## 2026-05-11 - Gotchas dedup check + classification upgrade path
 
 - Upstream commit: pending in this working tree

@@ -24,27 +24,50 @@ Check line counts for all files under `skills/{{NAME}}/` and flag those that may
 
 Note: these numbers are **reference values**, not hard thresholds. A 250-line rules file with a single coherent topic is perfectly fine to keep.
 
-## Step 1b: Accumulation Check (all file types)
+## Step 1b: Accumulation Check (tiered triggers — when to spend tokens)
 
-Accumulation rot is not limited to gotchas. Check **every** file under `skills/{{NAME}}/`:
+Accumulation rot is not limited to gotchas, but the cost of detecting it is not uniform. A full agent-led reorganization of a 300-line file costs real tokens; the same file checked by `grep` costs nothing. The discipline below uses **three tiers** of trigger so the expensive scan only runs when the cheap one has already flagged something or when accumulated pressure has crossed a real threshold.
 
-| File type | Entry count trigger | Action |
-|---|---|---|
-| `references/gotchas.md` | > 30 entries | Evaluate: group by domain, remove resolved, merge duplicates |
-| `rules/*.md` | > 25 bullet-level rules in one file | Evaluate: are any duplicates? Any obsolete after recent changes? |
-| `references/*.md` (non-gotchas) | > 40 entries | Evaluate: can entries be grouped under better H2/H3 sections? |
+### The three tiers
 
-For each file that exceeds the trigger, do these passes **in order** — they form a "categorize before splitting" pipeline so you do not split prematurely:
+| Tier | When it runs | Who runs it | Cost |
+|---|---|---|---|
+| **0 — bash gate** | Every `smoke-test.sh` run (every commit if wired into a hook) | `smoke-test.sh § 2a` — `grep "^## " <file> | sort | uniq -d` | ~0 tokens (bash) |
+| **1 — AAR similarity scan** | Whenever the agent is about to append a new entry via `update-rules.md § Search Before Record` | The same agent that just ran the task — context is already loaded | ~few hundred tokens (targeted scan of 3–5 candidates, not the whole file) |
+| **2 — full reorganization pass** | Only when a Tier-2 trigger fires (see below) | Agent reads the full file and restructures | ~thousands of tokens |
+
+**Tier 2 triggers** — any one of these is enough; do not run Tier 2 just because it has been a while:
+
+- File entry count > 25 for `references/gotchas.md` / `references/*pitfall*.md`
+- File line count > 80% of cap (i.e. > 320 lines when cap is 400)
+- `rules/*.md` has > 25 bullet-level rules
+- `references/*.md` (non-gotchas) has > 40 entries
+- Smoke-test Tier-0 flagged a duplicate **and** the previous Tier-2 pass was more than ~30 days ago (a single dup is normal noise; recurring dups in a recently-cleaned file signal real drift)
+- A user explicitly asks for cleanup ("整理一下", "dedup gotchas", "reorganize this file")
+
+Do **not** auto-fire Tier 2 from `smoke-test.sh`. Smoke-test should stay deterministic, fast, and free; Tier 2 lives in this workflow, run on demand.
+
+### What Tier 2 does (the full pipeline)
+
+Run these passes **in order** — they form a "categorize before splitting" pipeline so you do not split prematurely:
 
 1. **Dedup scan (always first)** — surface real duplicates before any reorganization.
    - Exact-heading duplicates: `grep "^## " <file> | sort | uniq -d` lists every `##` heading that appears more than once. Same heading recorded twice = same entry copy-pasted; merge or delete one.
    - Topic-tag duplicates: `grep -oP '\*\*\[([^\]]+)\]' <file> | sort | uniq -c | sort -rn` lists `**[topic]**` tag frequency; tags with high counts are merge candidates.
-   - Smoke-test (`smoke-test.sh § 2a`) fails on exact-heading duplicates inside `gotchas.md` / `*pitfall*.md` automatically.
+   - Near-duplicates (different wording, same root cause) — agent reads the candidate set and decides; this is where Tier 2 spends most of its tokens, and why it is rare.
 2. **Staleness scan** — are any entries about technology/patterns that have since been removed from the project? Delete stale entries or mark `<!-- DEPRECATED: reason, YYYY-MM -->`.
-3. **Categorize (before splitting)** — if a file still has > 10 entries after dedup, group them under H2 categories before considering a split. Promote frequent `**[topic]**` tags to `## CategoryName` headings; rename individual entries from `## **[topic]** title` to `### **[topic]** title` under the right category. This usually buys you another 2-3× growth before a physical split is needed, and makes future dedup scans O(category) instead of O(file).
+3. **Categorize (before splitting)** — if a file still has > 10 entries after dedup, group them under H2 categories before considering a split. Promote frequent `**[topic]**` tags to `## CategoryName` headings; rename individual entries from `## **[topic]** title` to `### **[topic]** title` under the right category. This usually buys another 2–3× growth before a physical split is needed, and makes future dedup scans O(category) instead of O(file) — which lowers Tier-1 token cost too.
 4. **Structural scan** — after categorizing, re-anchor any remaining orphan entries under the correct H2 section.
 5. **Tag audit** — do all entries carry `**[topic]**` tags? If > 50% are untagged, tag them in this same pass while attention is on the file.
 6. **Split (last resort)** — only after dedup + categorize. Split when a single H2 category itself crosses the entry/line trigger, or when categories have genuinely different audiences (e.g. backend rules vs. frontend rules). Each resulting file should still be ≥ 30 lines after split (otherwise merge candidates).
+
+### Token-cost intuition for maintainers
+
+- A project that adds ~5 new gotchas per month and is never reorganized will hit Tier 2 in about half a year. That is the expected cadence — not "weekly", not "yearly".
+- Tier 1 runs at every closure event with a new gotcha. Most of those find no match and add the entry; a few find a near-match and merge. Both are cheap.
+- Tier 0 runs at every commit. Free.
+
+If you find yourself running Tier 2 more than once a quarter on the same file, the file is the wrong shape — split it (step 6 above) so each subfile stays under its own threshold.
 
 ## Step 1c: External Fact Freshness
 
