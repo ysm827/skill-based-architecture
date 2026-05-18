@@ -1,11 +1,13 @@
 # Canonical self-hosting routing manifest
 #
 # This repo is self-hosting: formal skill docs live at repo root rather than
-# under skills/<name>/. Root harness files only receive a short bootstrap block.
-# Edit this YAML first, then run:
+# under skills/<name>/. Root harness files (AGENTS / CLAUDE / CODEX / GEMINI /
+# .cursor/rules/workflow.mdc) are generated from this manifest plus
+# references/self-hosting-shell-base.md and references/self-hosting-shells.yaml.
+# Edit any of those, then run:
 #
-#   bash scripts/sync-self-routing.sh
-#   bash scripts/check-self-routing.sh
+#   bash scripts/sync-self-shells.sh
+#   bash scripts/check-self-shells.sh
 
 tasks:
   - id: migrate-downstream
@@ -114,6 +116,26 @@ tasks:
       - 多个独立子任务并行
       - 这个任务比较大
       - run several subtasks
+
+  - id: plan-and-distill
+    labels:
+      en: Draft a plan; on close, lift load-bearing conclusions into rules / gotchas / pitfalls
+      zh: 写计划;结束时把有约束力的结论搬进 rules / gotchas / pitfalls
+    required_reads:
+      - SKILL.md
+      - docs/plans/README.md
+      - templates/skill/workflows/plan-feature.md
+      - templates/skill/workflows/update-rules.md
+    workflow: templates/skill/workflows/plan-feature.md
+    trigger_examples:
+      - 我们规划一下
+      - 制定一个 plan
+      - 这次改动总结成规则
+      - 把 plan 的结论沉淀下来
+      - 看看之前有没有相关 rules 或 pitfalls
+      - draft a plan
+      - distill plan conclusions
+      - scan related rules and gotchas
 
   - id: other
     labels:

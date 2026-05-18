@@ -9,8 +9,9 @@ Look up what you need, not everything. Reference topics live under [`references/
 - **Diagnosing instability — is it prompt, context, or harness?** → [`references/layout.md § Positioning in the Agent Stack`](references/layout.md#positioning-in-the-agent-stack)
 - **Writing or debugging thin shells** → [`references/thin-shells.md`](references/thin-shells.md) (common body, hooks, hygiene); [`references/per-tool-shells.md`](references/per-tool-shells.md) (per-tool templates + compatibility matrix)
 - **Updating downstream task routing** → edit `skills/<name>/routing.yaml`, then `bash skills/<name>/scripts/sync-routing.sh <name> --check`
-- **Updating this repo's self-hosting shell routes** → edit [`references/self-hosting-routing.yaml`](references/self-hosting-routing.yaml), then `bash scripts/sync-self-routing.sh` + `bash scripts/check-self-routing.sh`
+- **Updating this repo's self-hosting shells** → for route changes edit [`references/self-hosting-routing.yaml`](references/self-hosting-routing.yaml); for shell content (Auto-Triggers, Red Flags, per-harness opening) edit [`references/self-hosting-shell-base.md`](references/self-hosting-shell-base.md) and/or [`references/self-hosting-shells.yaml`](references/self-hosting-shells.yaml). Then `bash scripts/sync-self-shells.sh` + `bash scripts/check-self-shells.sh`. Never hand-edit `AGENTS.md` / `CLAUDE.md` / `CODEX.md` / `GEMINI.md` / `.cursor/rules/workflow.mdc` directly — they are generated.
 - **Task Closure Protocol, recording lessons, or activation verification** → [`references/protocols.md`](references/protocols.md)
+- **Closing a plan — where its conclusions go** → [`templates/skill/workflows/plan-feature.md`](templates/skill/workflows/plan-feature.md) § Complex Steps step 8 + [`docs/plans/README.md`](docs/plans/README.md) "When a plan closes". Load-bearing conclusions go into `rules/` (must / must not), `references/gotchas.md` or SKILL.md § Common Pitfalls (anti-patterns); the plan itself archives in [`docs/plans/`](docs/plans/) as audit trail. A separate `references/decisions/` directory was tried and removed — it became a silo no routing pulled from
 - **Operating a multi-skill repo (routing, fission signals, coexistence rules)** → [`references/multi-skill-routing.md`](references/multi-skill-routing.md)
 - **Composing other skills from your workflows** → [`references/skill-composition.md`](references/skill-composition.md)
 - **Picking rule file sets, anti-patterns, file size budgets, troubleshooting** → [`references/conventions.md`](references/conventions.md)
@@ -30,6 +31,8 @@ Look up what you need, not everything. Reference topics live under [`references/
 | [scenario-testing.md](references/scenario-testing.md) | Unit/contract/golden/scenario testing layers for skill behavior, especially executable or high-risk routes |
 | [conventions.md](references/conventions.md) | Common rule file sets by project type, decision guide, what to preserve vs remove, anti-patterns, troubleshooting, file size guidelines, naming conventions, optional CI validation |
 | [self-hosting-routing.yaml](references/self-hosting-routing.yaml) | Canonical YAML route manifest for this repo's root thin-shell bootstraps, plus sync/check protocol |
+| [self-hosting-shell-base.md](references/self-hosting-shell-base.md) | Common body (Auto-Triggers + Red Flags) injected into every generated root shell |
+| [self-hosting-shells.yaml](references/self-hosting-shells.yaml) | Per-harness frontmatter / title / opening / optional appended section for AGENTS / CLAUDE / CODEX / GEMINI / Cursor workflow.mdc |
 | [self-hosting-conformance.yaml](references/self-hosting-conformance.yaml) | Content-presence guard for this repo's own canon — asserts canonical files still teach the protocols `templates/skill/conformance.yaml` promises downstream |
 
 New references should link to the topic file directly (e.g. `references/per-tool-shells.md#tool-compatibility-summary`), not through this stub.

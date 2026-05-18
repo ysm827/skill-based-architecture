@@ -1,0 +1,21 @@
+# Maintenance ledger — Tier-2 reorganization state per long-lived file.
+# Schema + write protocol: templates/skill/workflows/maintain-docs.md § Step 7.
+# Read by smoke-test.sh § 2a when a duplicate ## heading is found in
+# references/*gotcha*.md or references/*pitfall*.md.
+#
+# This file is per-skill state, NOT a template. Each downstream skill
+# maintains its own at `skills/<name>/.maintenance-log.yaml`. The upstream
+# self-hosting repo keeps the equivalent here at the repo root and treats
+# it the same way a downstream skill would.
+
+files:
+  - path: UPSTREAM-CHANGES.md
+    notes: |
+      Archive policy ~300 lines / 8 entries (see file header).
+      Status 2026-05-12: 374 lines, 14 entries — archive pass overdue.
+      Next pass: move pre-2026-05-09 entries to UPSTREAM-CHANGES-archive.md.
+
+  - path: examples/behavior-failures.md
+    notes: |
+      AAR / lesson log; entries-style. 7 entries.
+      Tier-2 baseline pending — run on next dedup signal or by 2026-08.

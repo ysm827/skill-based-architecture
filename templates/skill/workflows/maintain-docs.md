@@ -42,7 +42,7 @@ Accumulation rot is not limited to gotchas, but the cost of detecting it is not 
 - File line count > 80% of cap (i.e. > 320 lines when cap is 400)
 - `rules/*.md` has > 25 bullet-level rules
 - `references/*.md` (non-gotchas) has > 40 entries
-- Smoke-test Tier-0 flagged a duplicate **and** the previous Tier-2 pass was more than ~30 days ago (a single dup is normal noise; recurring dups in a recently-cleaned file signal real drift)
+- Smoke-test Tier-0 flagged a duplicate **and** `.maintenance-log.yaml` shows the previous Tier-2 pass was > 30 days ago (a single dup is normal noise; recurring dups in a recently-cleaned file signal real drift). No ledger entry for the file = "no baseline yet" = treat the dup as a Tier-2 baseline trigger. See Step 7 for the ledger schema.
 - A user explicitly asks for cleanup ("整理一下", "dedup gotchas", "reorganize this file")
 
 Do **not** auto-fire Tier 2 from `smoke-test.sh`. Smoke-test should stay deterministic, fast, and free; Tier 2 lives in this workflow, run on demand.
@@ -69,6 +69,20 @@ Run these passes **in order** — they form a "categorize before splitting" pipe
 4. **Structural scan** — after categorizing, re-anchor any remaining orphan entries under the correct H2 section.
 5. **Tag audit** — do all entries carry `**[topic]**` tags? If > 50% are untagged, tag them in this same pass while attention is on the file.
 6. **Split (last resort)** — only after dedup + categorize. Split when a single H2 category itself crosses the entry/line trigger, or when categories have genuinely different audiences (e.g. backend rules vs. frontend rules). Each resulting file should still be ≥ 30 lines after split (otherwise merge candidates).
+7. **Update the maintenance ledger (closure gate)** — Tier-2 is incomplete until the ledger is updated. The ledger is the only mechanism that distinguishes "a duplicate in this file is normal noise" from "this file has drifted enough to need a full reorg"; without it, the > 30-days trigger in the list above has no clock and the whole tier model degrades to agent guesswork.
+
+   - **Location:** `.maintenance-log.yaml` at skill root — `skills/<name>/.maintenance-log.yaml` downstream, `./.maintenance-log.yaml` self-hosting.
+   - **Schema** (one entry per long-lived file the project intends to maintain at Tier-2; `path` required, `last_tier2` required once a pass has run, the rest advisory):
+     ```yaml
+     files:
+       - path: references/gotchas.md
+         last_tier2: 2026-04-15
+         passes_run: [dedup, categorize]   # which steps 1–6 above actually executed
+         entries_after: 18                  # grep -c '^## ' after the pass; baseline for next drift check
+     ```
+   - **Write step:** after completing steps 1–6 on a file, run `grep -c '^## ' <file>` for `entries_after`, list executed passes in `passes_run` (skipped passes that produced an empty diff still count as "run"; not-attempted passes are omitted), set `last_tier2: $(date +%Y-%m-%d)`, then write or replace the entry under `files:`.
+   - **Read step:** `smoke-test.sh § 2a` consults the ledger on every detected duplicate `##` heading. No entry → "first-time dup, run Tier-2 baseline". `last_tier2` > 30 days → "Tier-2 stale, run full reorg". `last_tier2` ≤ 30 days → "dedup this entry only, skip full Tier-2". The duplicate itself always fails (verbatim copy-paste is always wrong); the ledger only governs whether *a full reorg* is recommended on top of the dedup.
+   - **Stale ledger entries:** when this Tier-2 pass discovers a `path` that no longer exists in the project, remove the entry in the same pass. The ledger should never reference deleted files.
 
 ### Token-cost intuition for maintainers
 

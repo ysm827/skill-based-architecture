@@ -135,6 +135,23 @@ pass() { ((PASS++)); echo "  ✅ $1"; }
 fail() { ((FAIL++)); echo "  ❌ $1"; }
 warn() { ((WARN++)); echo "  ⚠️  $1"; }
 
+# .maintenance-log.yaml helpers — schema + protocol: workflows/maintain-docs.md § Step 7.
+read_ledger_last_tier2() {
+  # $1=ledger, $2=relative file path. Echoes last_tier2 (YYYY-MM-DD) or empty.
+  [[ -f "$1" ]] || return 0
+  awk -v t="$2" '
+    /^[[:space:]]*-[[:space:]]*path:/ { sub(/.*path:[[:space:]]*/,""); gsub(/["'\'']/,""); cur=$0; next }
+    cur==t && /^[[:space:]]+last_tier2:/ { sub(/.*last_tier2:[[:space:]]*/,""); gsub(/["'\'']/,""); if ($0!="") { print; exit } }
+  ' "$1"
+}
+days_since() {
+  # $1=YYYY-MM-DD. Echoes integer days (-1 if empty/unparseable). BSD + GNU date compatible.
+  [[ -z "$1" ]] && { echo -1; return; }
+  local s
+  s=$(date -j -f "%Y-%m-%d" "$1" "+%s" 2>/dev/null) || s=$(date -d "$1" "+%s" 2>/dev/null) || { echo -1; return; }
+  echo $(( ($(date +%s) - s) / 86400 ))
+}
+
 # ── 1. Structural Checks ─────────────────────────────────────────────
 has_routing_bootstrap() {
   local file="$1"
@@ -321,18 +338,10 @@ for shell in AGENTS.md CLAUDE.md CODEX.md GEMINI.md; do
 done
 check_lines "$CURSOR_ENTRY" 60 "Cursor entry"
 
-# 2a. gotchas / pitfall files — runaway growth is the #1 disk-size failure mode.
-# Default threshold $GOTCHAS_MAX_LINES = "split into topic-specific pitfall files
-# or deprecate stale entries". A fresh migration has a near-empty gotchas.md
-# (well under the cap); this fails only after accumulation without pruning. See
-# workflows/update-rules.md § Rule Deprecation and scripts/audit-references.sh.
-#
-# Also fails on exact-duplicate `## ` headings within a single gotchas/pitfall
-# file. Duplicate H2 headings (same heading text appearing 2+ times) signal
-# copy-paste recurrence — the entry was added a second time without dedup
-# scan, which is the literal failure mode `maintain-docs.md § Step 1b` exists
-# to prevent. This is a deterministic check (string equality on heading text)
-# with very low false-positive rate.
+# 2a. gotchas / pitfall files: enforce $GOTCHAS_MAX_LINES cap, fail on exact-dup `## ` headings,
+# and on dup also consult `.maintenance-log.yaml` to advise full Tier-2 reorg vs one-off dedup.
+# Rationale + protocol: workflows/maintain-docs.md § Step 1b + Step 7, workflows/update-rules.md § Rule Deprecation.
+LEDGER="$SKILL_DIR/.maintenance-log.yaml"
 for gotcha_file in "$SKILL_DIR/references"/*gotcha*.md "$SKILL_DIR/references"/*pitfall*.md; do
   [[ -f "$gotcha_file" ]] || continue
   check_lines "$gotcha_file" "$GOTCHAS_MAX_LINES" "$(basename "$gotcha_file") (pitfall log)"
@@ -341,8 +350,20 @@ for gotcha_file in "$SKILL_DIR/references"/*gotcha*.md "$SKILL_DIR/references"/*
     fail "$(basename "$gotcha_file") has duplicate ## headings — same entry recorded twice"
     echo "$DUPLICATE_HEADINGS" | head -5 | sed 's/^/       duplicate: /'
     DUP_COUNT=$(echo "$DUPLICATE_HEADINGS" | wc -l | tr -d ' ')
-    if [[ "$DUP_COUNT" -gt 5 ]]; then
-      echo "       … and $((DUP_COUNT - 5)) more duplicate(s)"
+    [[ "$DUP_COUNT" -gt 5 ]] && echo "       … and $((DUP_COUNT - 5)) more duplicate(s)"
+    REL=${gotcha_file#$SKILL_DIR/}
+    LT=$(read_ledger_last_tier2 "$LEDGER" "$REL")
+    if [[ -z "$LT" ]]; then
+      echo "       Tier-2 hint: no ledger entry for $REL — run baseline (maintain-docs.md § Step 7)"
+    else
+      AGE=$(days_since "$LT")
+      if [[ "$AGE" -lt 0 ]]; then
+        echo "       Tier-2 hint: ledger date '$LT' unparseable; check $LEDGER"
+      elif [[ "$AGE" -gt 30 ]]; then
+        echo "       Tier-2 hint: last reorg $AGE days ago ($LT) > 30d — run full Tier-2"
+      else
+        echo "       Tier-2 hint: last reorg $AGE days ago ($LT) ≤ 30d — dedup only, skip full Tier-2"
+      fi
     fi
   else
     pass "$(basename "$gotcha_file"): no duplicate ## headings"
@@ -663,12 +684,12 @@ fi  # end section 6
 # ── 7. Shell Routing Table Consistency ────────────────────────────────
 if section 7 "Shell Routing Consistency"; then :
 
-if [[ -f "scripts/check-self-routing.sh" && -f "references/self-hosting-routing.yaml" ]]; then
-  if bash scripts/check-self-routing.sh >/dev/null; then
-    pass "self-hosting routing bootstraps match canonical source"
+if [[ -f "scripts/check-self-shells.sh" && -f "references/self-hosting-routing.yaml" ]]; then
+  if bash scripts/check-self-shells.sh >/dev/null; then
+    pass "self-hosting shells match generated content"
   else
-    fail "self-hosting routing bootstraps drifted from references/self-hosting-routing.yaml"
-    echo "       Run: bash scripts/sync-self-routing.sh"
+    fail "self-hosting shells drifted from generated content"
+    echo "       Run: bash scripts/sync-self-shells.sh"
   fi
 fi
 

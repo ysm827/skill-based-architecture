@@ -11,7 +11,7 @@ Each check covers a different drift dimension. The columns are intentional: a ch
 | Dimension | Question it answers | Check |
 |---|---|---|
 | Routing source-of-truth (downstream) | Did SKILL.md / shells drift from `routing.yaml`? | `sync-routing.sh --check` |
-| Routing source-of-truth (self-hosting) | Did this repo's root shells / `skill.yaml` description drift from `SKILL.md`? | `check-self-routing.sh` |
+| Shell + activation source-of-truth (self-hosting) | Did this repo's root shells drift from generated content, or `skill.yaml` description drift from `SKILL.md`? | `check-self-shells.sh` |
 | Routing trigger coverage | Do `trigger_examples` actually route to the intended workflow? | `check-self-scenarios.sh` (upstream), `test-trigger.sh` (downstream) |
 | Description activation | Is `description` over-broad, too narrow, or trigger-phrase-less? | `check-description-routing.sh` |
 | Structural budgets | SKILL.md ≤ 100 lines, FILL markers, placeholder residue | `smoke-test.sh` |
@@ -29,10 +29,11 @@ Each check covers a different drift dimension. The columns are intentional: a ch
 | Script | Path | Audience |
 |---|---|---|
 | `check-all.sh` | `scripts/` | Upstream maintainer — orchestrator that runs the full gate before commit/push |
-| `check-self-routing.sh` | `scripts/` | Upstream-only (self-hosting routing manifest) |
+| `check-self-shells.sh` | `scripts/` | Upstream-only (calls `sync-self-shells.sh --check` + validates SKILL.md/skill.yaml description identity) |
 | `check-self-scenarios.sh` | `scripts/` | Upstream-only (self-hosting trigger routing) |
 | `check-upstream-changes.sh` | `scripts/` | Upstream-only (UPSTREAM-CHANGES.md guard) |
-| `sync-self-routing.sh` | `scripts/` | Upstream-only (regenerates self-hosting bootstraps) |
+| `check-upstream-supersedes.sh` | `scripts/` | Upstream-only (validates `Status: superseded by` refs in UPSTREAM-CHANGES{.md,-archive.md}) |
+| `sync-self-shells.sh` | `scripts/` | Upstream-only (generates root shells from `self-hosting-shell-base.md` + `self-hosting-shells.yaml`) |
 | `skill-asset` | `scripts/` | Both — AAR consolidation helper (ships to downstream) |
 | `smoke-test.sh` | `templates/skill/scripts/` | Downstream — Phase-aware structural gate |
 | `sync-routing.sh` | `templates/skill/scripts/` | Downstream — `routing.yaml` is the source of truth |

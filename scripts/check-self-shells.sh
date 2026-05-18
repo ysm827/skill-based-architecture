@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
-# Verify root thin-shell routing bootstraps and activation metadata stay in sync.
+# Verify root thin shells match generated content + activation metadata stays
+# identical across SKILL.md, .cursor/skills/.../SKILL.md, and skill.yaml.
 
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-"$ROOT/scripts/sync-self-routing.sh" --check
+"$ROOT/scripts/sync-self-shells.sh" --check
 
 python3 - "$ROOT" <<'PY'
 from pathlib import Path

@@ -1,20 +1,3 @@
-# GEMINI.md
-
-This repo is the **skill-based-architecture** meta-skill itself. Formal docs live at the repo root (self-hosting layout, see [references/layout.md](references/layout.md)). Read [SKILL.md](SKILL.md) first — it is the router.
-
-<!-- SELF_ROUTING_BLOCK_START -->
-## Quick Routing (survives context truncation)
-
-Task routes live in `references/self-hosting-routing.yaml`.
-
-For every new task:
-1. Read `SKILL.md`.
-2. Read `references/self-hosting-routing.yaml`.
-3. Match by `labels`, `trigger_examples`, and task intent.
-4. Read only that route's `required_reads`, then follow its `workflow`.
-5. If no route matches, use the `other` route.
-<!-- SELF_ROUTING_BLOCK_END -->
-
 ## Auto-Triggers
 
 - **New task in same session** → re-read `SKILL.md`, re-match the route above, re-read all required files. "I already read it" is not valid — context compresses, routes differ.

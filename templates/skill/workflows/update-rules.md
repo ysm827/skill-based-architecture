@@ -4,6 +4,8 @@
 - Long-lived, must-follow constraints → `rules/`
 - Task procedures with ordered steps → `workflows/`
 - Architecture, routing, dependency explanations → `references/`
+- Anti-patterns, footguns, "we tried X, here is why X is wrong" → `references/gotchas.md` (or domain-specific `references/*pitfall*.md`); promote to SKILL.md § Common Pitfalls when the lesson must surface on every task
+- Frozen plan snapshots (audit trail only, not active knowledge) → `docs/plans/`; load-bearing content from the plan goes into the rows above, not stored only in the plan
 - External-facing material → `docs/`
 
 ## Sync Targets
@@ -12,6 +14,7 @@
 |---|---|
 | New/renamed workflow or reference file | `routing.yaml`, then run `scripts/sync-routing.sh` |
 | UI convention / host compatibility / overlay layering / z-index / styling behavior issue that future agents would guess wrong without docs | Update the relevant `rules/*.md` or `references/*.md`, and update `SKILL.md` summary if the pitfall should surface earlier |
+| Plan landed (`status: done`) with a load-bearing conclusion | Lift the conclusion: "must / must not do X" → `rules/<topic>.md`; "tried Y, Y is wrong" → `references/gotchas.md` or SKILL.md § Common Pitfalls. Set the plan's `distilled_to:` frontmatter to the files that received content. Pure-provenance conclusions stay in the plan archive only |
 | <!-- FILL: project-specific trigger → target file --> | <!-- FILL --> |
 
 Threshold: if this change would cause someone to guess wrong on a similar task without reading the docs, update. Otherwise skip.
@@ -19,11 +22,28 @@ Threshold: if this change would cause someone to guess wrong on a similar task w
 > **The trigger table itself is a living document:** when you discover a new change-to-update mapping, add it to this table.
 
 ## Task Closure Protocol
-A task is NOT complete until all seven gates are done:
+
+### Task Closure Trigger Policy
+
+Decide the task type first, then decide whether to enter Task Closure Protocol. Do not pay rule-maintenance cost on pure Q&A or read-only tasks.
+
+| Task type | Closure requirement |
+|---|---|
+| Pure Q&A, code explanation, read-only investigation, advice — and no files changed | No AAR, no smoke-test; just answer |
+| Format-only, comment-only, behavior-preserving rename — and no new reusable lesson | No AAR; do text/format checks as needed |
+| Modified production code, API / RPC contracts, response shape, validation/exception, transactions, locks, async tasks, or call chains | Run lightweight AAR scan; if all four answers are "no", stop |
+| Modified the *meaning* of `skills/` rules / references / workflows documents | Run lightweight AAR, and run the gates whose trigger fires (Search Before Record / cross-reference sync / text checks) |
+| Modified `routing.yaml`, `SKILL.md` generated blocks, entry shells, scripts, file paths, or skill structure | Run the corresponding route/structure checks; **only this category defaults to considering** `sync-routing.sh`, `smoke-test.sh`, or orphan audits |
+| User explicitly asked for "run full validation / doc health check / smoke-test" | Execute as requested |
+
+`smoke-test.sh` is a skill structure / routing / link / budget validator. It is **not** the default closure action for ordinary code changes, explanation tasks, or read-only investigation.
+
+Once the policy says this task enters the protocol, the task is NOT complete until every triggered gate is handled:
+
 1. **Main work + original-constraint check** — before final validation, restate the original request, chosen route, and forbidden shortcuts; if the task was long/interrupted and you cannot, run `protocol-blocks/reboot-check.md`, then verify/tests pass
 2. **30-second AAR scan** — run the checklist below; all "no" = stop here
 3. **Record if needed** — any "yes" → apply recording threshold → **reconcile before writing** (run `bash scripts/skill-asset where <keywords>` to surface candidate destination sections; merge into the closest existing section, or create a new one only when no fit) → record at the chosen destination
-4. **Path integrity gate** — if this task touched any `.md` file in skill structure, run these from the project repo root before commit; fix failures in the same commit:
+4. **Path integrity gate** — fires only when this task modified skill routing, entry shells, scripts, file paths, generated blocks, or `.md` content that may break links/structure. Run these from the project repo root before commit; fix failures in the same commit:
    - `bash "skills/<skill-name>/scripts/sync-routing.sh" "<skill-name>" --check` — generated Always Read, Common Tasks, and bootstraps match `routing.yaml`
    - `bash "skills/<skill-name>/scripts/smoke-test.sh" "<skill-name>" --phase 8` — markdown links, structure, routing, and budgets still pass
    - `(cd "skills/<skill-name>" && bash scripts/audit-references.sh --orphans)` — no `rules/` or `references/` file has zero inbound links
@@ -32,7 +52,9 @@ A task is NOT complete until all seven gates are done:
 6. **Behavior validation fit** — if the edit adds or changes a high-risk route, non-idempotent workflow, executable script contract, or external skill handoff, decide whether a contract or scenario test is needed; structural smoke tests alone do not prove route behavior.
 7. **External fact freshness** — if the edit adds or changes a claim about an external tool, framework, hosted service, API, model, CLI, or official behavior, verify against the primary source, add/refresh `<!-- external-fact: verified=YYYY-MM-DD source=https://official.example/docs -->`, then run `bash "skills/<skill-name>/scripts/check-external-facts.sh" .`. Project-internal facts do not need this marker.
 
-No workflow may declare completion without step 2. Steps 3–7 fire conditionally (3 on AAR hits, 4 on any `.md` edit, 5 on rules/references *meaning* changes, 6 on high-risk behavior changes, 7 on external facts) and are mandatory when their trigger fires.
+Do not run gates on tasks the Trigger Policy did not admit into the protocol. Steps 3–7 fire conditionally (3 on AAR hits, 4 on skill routing/structure/link-affecting changes, 5 on rules/references *meaning* changes, 6 on high-risk behavior changes, 7 on external facts) and are mandatory when their trigger fires.
+
+**Plan-closure prompt — not a gate, but follow it:** if this task flipped a plan in `docs/plans/` to `status: done`, sort every conclusion in `decisions.md` (or the simple plan's body) into `rules/` (must / must not), `references/gotchas.md` or SKILL.md § Common Pitfalls (anti-pattern with reasoning), or "neither — pure provenance, stays archived only". Update the plan's `distilled_to:` frontmatter accordingly. No script verifies this — the cost of skipping it is silent: load-bearing content stranded in a frozen plan that nobody re-reads. See `templates/skill/workflows/plan-feature.md` step 8 for the full trichotomy.
 
 ### Rationalizations to Reject
 
@@ -40,7 +62,7 @@ When the Agent feels the urge to skip the AAR, these are the common excuses and 
 
 | Rationalization | Reality |
 |---|---|
-| "This task was small — AAR is overkill" | Small tasks are where lessons hide. The AAR scan takes 30 seconds; skipping it is slower than doing it |
+| "This task changed behavior but is small — skip AAR" | Behavior change is the trigger; size is not. The AAR scan takes 30 seconds; skipping it is slower than doing it. Read-only tasks are already exempted by the Trigger Policy — do not stretch the "small" excuse into "no AAR ever" |
 | "I'll run AAR at the end of the session" | You will forget. The scan must happen at task closure, not batched |
 | "Nothing new happened, just a routine fix" | If nothing new happened, the scan returns "no" on all four questions in 30 seconds. Do it anyway |
 | "The user is in a hurry" | The protocol exists *because* hurry produces the worst pitfalls. Pressure is a reason to run AAR, not skip it |
@@ -66,7 +88,9 @@ When the Agent feels the urge to skip the AAR, these are the common excuses and 
 
 ## After-Action Review
 
-The 30-second scan from step 2 of the Task Closure Protocol. Skip only for: formatting-only, comment-only, dependency-version-only, or behavior-preserving refactors.
+The 30-second scan from step 2 of the Task Closure Protocol. Run only when the Trigger Policy says this task entered the protocol.
+
+Skip entirely for: pure Q&A, code explanation, read-only investigation, advice with no file changes; formatting-only, comment-only, dependency-version-only, or behavior-preserving refactors.
 
 Checklist:
 

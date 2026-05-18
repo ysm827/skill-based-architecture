@@ -1,0 +1,55 @@
+# Per-harness deltas for self-hosting thin shells.
+#
+# Common body (Auto-Triggers + Red Flags) lives in references/self-hosting-shell-base.md.
+# Routing block content comes from references/self-hosting-routing.yaml (validated existence)
+# but the literal block text is hardcoded in scripts/sync-self-shells.sh.
+#
+# Generator: scripts/sync-self-shells.sh. Composition order per shell:
+#   1. <frontmatter> (optional, only for .cursor/rules/workflow.mdc)
+#   2. # <title>
+#   3. <opening>
+#   4. <!-- SELF_ROUTING_BLOCK_START --> ... <!-- SELF_ROUTING_BLOCK_END -->
+#   5. base.md contents (Auto-Triggers + Red Flags)
+#   6. <appended> (optional, e.g. Codex-specific notes)
+#
+# DO NOT hand-edit AGENTS.md / CLAUDE.md / CODEX.md / GEMINI.md / .cursor/rules/workflow.mdc.
+# Run `bash scripts/sync-self-shells.sh` after editing this file or the base.md.
+
+shells:
+  - file: AGENTS.md
+    title: AGENTS.md
+    opening: |
+      The **skill-based-architecture** meta-skill — a router-pattern scaffold for restructuring scattered project rules into a maintainable skill directory, with cross-tool thin shells, Task Closure Protocol, and self-evolving workflows.
+
+      Formal docs live at repo root (self-hosting layout). Read [SKILL.md](SKILL.md) first — it is the router.
+
+  - file: CLAUDE.md
+    title: CLAUDE.md
+    opening: |
+      This repo is the **skill-based-architecture** meta-skill itself. Formal docs live at the repo root (self-hosting layout, see [references/layout.md](references/layout.md)). Read [SKILL.md](SKILL.md) first — it is the router.
+
+  - file: CODEX.md
+    title: CODEX.md
+    opening: |
+      This repo is the **skill-based-architecture** meta-skill itself. Formal docs live at the repo root (self-hosting layout, see [references/layout.md](references/layout.md)). Read [SKILL.md](SKILL.md) first — it is the router.
+    appended: |
+      ## Codex-specific notes
+
+      - When executing `WORKFLOW.md` phases, prefer sequential edits over bulk rewrites — Codex's `apply_patch` works best on focused diffs.
+      - When modifying `templates/`, run `bash templates/skill/scripts/smoke-test.sh <test-name>` against a sample target before declaring completion.
+
+  - file: GEMINI.md
+    title: GEMINI.md
+    opening: |
+      This repo is the **skill-based-architecture** meta-skill itself. Formal docs live at the repo root (self-hosting layout, see [references/layout.md](references/layout.md)). Read [SKILL.md](SKILL.md) first — it is the router.
+
+  - file: .cursor/rules/workflow.mdc
+    frontmatter: |
+      ---
+      description: Compatibility shell — routes tasks to skill-based-architecture's self-hosted SKILL.md at repo root.
+      globs: ["**/*"]
+      alwaysApply: true
+      ---
+    title: Cursor Workflow Rule
+    opening: |
+      This repo is the **skill-based-architecture** meta-skill itself. Formal docs live at repo root. Read [SKILL.md](../../SKILL.md) first — it is the router.

@@ -70,7 +70,7 @@ Two kinds — each with a different "fill" mechanism:
 | `skill/workflows/update-rules.md`, `maintain-docs.md`, `subagent-driven.md` | ≤ 250 lines | Protocol-heavy workflows allowed more room |
 | `protocol-blocks/*` | ≤ 40 lines each | One idea per block |
 | `skill/SKILL.md.template` | dual budget: description ≤ 25 lines + body ≤ 90 lines | Same hard cap as downstream SKILL.md (smoke-test enforces both separately). description carries quoted trigger phrases; body navigates rules/workflows/references. Keep each shorter when possible. |
-| `skill/scripts/smoke-test.sh` | ≤ 800 lines | Structural test harness; keep scenario behavior out of this script |
+| `skill/scripts/smoke-test.sh` | ≤ 850 lines (was 800; raised 2026-05-12 for ledger gate). **Next addition forces extraction** into a `check-<concern>.sh` companion script, following the established pattern of `check-description-routing.sh` / `sync-routing.sh`. | Structural test harness; keep scenario behavior out of this script |
 | `skill/scripts/test-trigger.sh` | ≤ 360 lines | Trigger-rate helper; split if it starts owning routing policy |
 | `skill/scripts/sync-routing.sh` | ≤ 320 lines | Generator/checker for routing.yaml-derived blocks; keep dependency-free |
 | `skill/scripts/audit-route-paths.sh` | ≤ 280 lines | Report route-to-reference activation paths; keep it report-first unless a project opts into strict mode |

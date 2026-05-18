@@ -62,13 +62,22 @@ Update `status` as the task moves. Delete the file when the plan is complete or 
 
 ## Complex Steps
 
-1. **Create / update dossier** — create the directory and seed `prd.md`, `decisions.md`, `checklist.md`, `research/`, `evidence/`, `implement.jsonl`, and `check.jsonl`.
-2. **Inspect first** — gather repo evidence before questioning: similar features, entry points, config, scripts, tests, and current docs.
-3. **Question gate** — classify each possible question through Gate A/B/C; ask only the highest-value next question.
-4. **Define scope** — write requirements, acceptance criteria, and out-of-scope items in `prd.md`.
-5. **Record decisions** — when choosing between approaches, append ADR-lite entries to `decisions.md`.
-6. **Prepare execution context** — fill `implement.jsonl` and `check.jsonl` with only relevant rule, workflow, research, evidence, and PRD files.
-7. **Final readback** — summarize requirements, acceptance criteria, chosen approach, out-of-scope items, and dossier path.
+1. **Scan existing rules / gotchas / pitfalls first** — before drafting `prd.md`, glance through `rules/`, `references/gotchas.md` (or any `references/*pitfall*.md`), and SKILL.md § Common Pitfalls for entries that look related to your scope. Read the relevant ones. These are the active constraints; proposing something the existing canon already rejected wastes the plan. Skip if these locations are empty.
+2. **Create / update dossier** — create the directory and seed `prd.md`, `decisions.md`, `checklist.md`, `research/`, `evidence/`, `implement.jsonl`, and `check.jsonl`.
+3. **Inspect first** — gather repo evidence before questioning: similar features, entry points, config, scripts, tests, and current docs.
+4. **Question gate** — classify each possible question through Gate A/B/C; ask only the highest-value next question.
+5. **Define scope** — write requirements, acceptance criteria, and out-of-scope items in `prd.md`.
+6. **Record decisions** — when choosing between approaches, append ADR-lite entries to `decisions.md`. **`decisions.md` is intra-plan and mutable** — local working notes that freeze with the plan archive on close. Load-bearing entries get lifted into the live structure at step 8; entries that don't make that cut stay here.
+7. **Prepare execution context** — fill `implement.jsonl` and `check.jsonl` with only relevant rule, workflow, research, evidence, and PRD files.
+8. **On closure: lift load-bearing content into the live structure** — when `status` flips to `done`, sort every conclusion in `decisions.md` (or the simple plan's body) into one of three buckets:
+
+   - **"Future work must / must not do X"** (a constraint that binds tasks beyond this plan) → add to a `rules/<topic>.md` file. Routing pulls `rules/` onto every relevant task path, so the constraint is read automatically.
+   - **"We tried Y; here is why Y is wrong"** (anti-pattern, footgun, rejected alternative worth remembering) → add an entry to `references/gotchas.md` (or `references/*pitfall*.md`), or — if the lesson is high-value enough to surface early — promote it to SKILL.md § Common Pitfalls. Use the "alternatives rejected" framing while the context is still fresh; six months from now you cannot reconstruct it.
+   - **Neither** — pure provenance ("what happened, why we did it then") with no future binding → leave it in the plan archive and omit `distilled_to:`. Note the judgment in the plan body so future readers can see you actively chose not to lift anything.
+
+   Then set the plan's `distilled_to:` frontmatter to list the live-structure files that received content. If the conclusion fits two buckets (e.g. both a rule and a pitfall), it goes in both — different audiences, not duplicates. **There is no fourth bucket** called `references/decisions/`; that was tried and removed (silo problem — see [docs/plans/README.md](../../../docs/plans/README.md) "When a plan closes").
+
+9. **Final readback** — summarize requirements, acceptance criteria, chosen approach, out-of-scope items, and dossier path.
 
 ## Workflow-State Blocks
 
@@ -98,3 +107,4 @@ Planning is complete. Verify `implement.jsonl` and `check.jsonl` point at the PR
 - [ ] Research and evidence are not mixed into `prd.md`
 - [ ] `implement.jsonl` and `check.jsonl` contain only relevant files
 - [ ] `.skill-workflow-state` was removed or left with the correct active state
+- [ ] If the plan landed (`status: done`): step 8 was actually performed — every `decisions.md` entry was sorted into `rules/` / `references/gotchas.md` / SKILL.md Pitfalls / "no, pure provenance"; `distilled_to:` frontmatter reflects what was lifted

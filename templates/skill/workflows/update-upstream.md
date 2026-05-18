@@ -21,7 +21,7 @@ Use when the user says the upstream skill-based-architecture project changed and
    tmp="$(mktemp -d)"
    git clone https://github.com/WoJiSama/skill-based-architecture.git "$tmp/upstream"
    ```
-3. **Read upstream update notes** — if `$tmp/upstream/UPSTREAM-CHANGES.md` exists, read the newest relevant entries to learn likely changed areas and intended downstream handling. Use this as a map, not as proof that a file should change, and do not copy it into the downstream repo.
+3. **Read upstream update notes** — if `$tmp/upstream/UPSTREAM-CHANGES.md` exists, read the newest relevant entries to learn likely changed areas and intended downstream handling. Use this as a map, not as proof that a file should change, and do not copy it into the downstream repo. **Skip any entry whose first bullet is `- Status: superseded by …` or `- Status: deprecated …`** — superseded entries describe guidance that has since been reversed (follow the newer entry the line points to instead); deprecated entries describe mechanisms that were removed entirely.
 4. **Classify files before editing**
    - Upstream-only: `$tmp/upstream/UPSTREAM-CHANGES.md`. Read during refresh; never port into downstream.
    - Project-owned: `rules/project-rules.md`, `rules/coding-standards.md`, `references/gotchas.md`, project-specific workflows, `SKILL.md` prose, `routing.yaml` task examples. Preserve; merge manually if needed.

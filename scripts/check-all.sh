@@ -12,8 +12,9 @@ Usage: scripts/check-all.sh [--base <git-ref>] [--staged]
 
 Runs the self-hosting upstream maintenance checks used before commit/push:
   - upstream change-note guard
+  - upstream supersedes refs check
   - template routing manifest check
-  - self-hosting routing/activation check
+  - self-hosting shells + activation check
   - whitespace diff check
   - description routing check
   - growth health report
@@ -71,8 +72,10 @@ else
   run "whitespace diff check" git diff --check
 fi
 
+run "upstream supersedes refs check" bash scripts/check-upstream-supersedes.sh
+
 run "template routing manifest check" bash templates/skill/scripts/sync-routing.sh templates/skill --check
-run "self-hosting routing and activation check" bash scripts/check-self-routing.sh
+run "self-hosting shells + activation check" bash scripts/check-self-shells.sh
 run "description routing check" bash templates/skill/scripts/check-description-routing.sh .
 run "growth health report" bash templates/skill/scripts/check-growth-health.sh .
 run "template route-path activation report" bash templates/skill/scripts/audit-route-paths.sh templates/skill

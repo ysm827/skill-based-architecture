@@ -15,10 +15,17 @@ For a higher-level orientation and the minimal starter scaffold, see [`TEMPLATES
 Canonical source: [`templates/skill/workflows/update-rules.md`](../templates/skill/workflows/update-rules.md#task-closure-protocol).
 
 This reference deliberately gives only the operating summary: task closure
-means main-work verification, the 30-second AAR scan, and any triggered
-recording, path-integrity, route-path, cross-reference, behavior-validation, or
-external-fact checks. Keep the exact gate wording in `update-rules.md` so the
-protocol does not drift across guide/reference copies.
+applies only when the **Trigger Policy** admits the task (code or doc was
+changed); for those tasks, closure means main-work verification, the 30-second
+AAR scan, and any triggered recording, path-integrity, route-path, cross-
+reference, behavior-validation, or external-fact checks. Keep the exact gate
+wording and trigger table in `update-rules.md` so the protocol does not drift
+across guide/reference copies.
+
+**Pure Q&A, code explanation, read-only investigation, and advice with no file
+changes are exempt** — do not enter the protocol, do not run AAR, do not run
+`smoke-test.sh`. `smoke-test.sh` is a skill structure/routing/link validator,
+not a default closure action for ordinary code changes or read-only work.
 
 > **Reconcile tip (gate 3)**: before writing a recorded lesson, run `bash scripts/skill-asset where <keywords>` to surface existing sections that may already cover the topic. Avoids duplicate sections accumulating across files. See [`scripts/README.md`](../scripts/README.md) for `where` / `related` / `group` usage.
 
@@ -30,7 +37,7 @@ protocol does not drift across guide/reference copies.
 4. Did an existing rule turn out to be inaccurate or obsolete?
 5. Did the task rely on an external fact that could have changed since the rule was written?
 
-Skip only for: formatting-only, comment-only, dependency-version-only, or behavior-preserving refactors.
+Skip the AAR entirely for: pure Q&A, code explanation, read-only investigation, advice with no file changes; formatting-only, comment-only, dependency-version-only, or behavior-preserving refactors.
 
 ## Recording Threshold
 
