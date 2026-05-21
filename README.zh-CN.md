@@ -4,7 +4,7 @@
 
 # Skill-Based Architecture
 
-<p align="left">
+<p align="center">
   <a href="https://github.com/WoJiSama/skill-based-architecture/stargazers">
     <img alt="GitHub stars" src="https://img.shields.io/github/stars/WoJiSama/skill-based-architecture?style=flat&logo=github">
   </a>
@@ -69,11 +69,18 @@ AGENTS.md / CLAUDE.md / CODEX.md / GEMINI.md / .cursor/rules / .codex
 
 ### 1. 把这个 meta-skill 拉到本地
 
-| 使用场景 | clone 目标 |
-|---|---|
-| Cursor 用户级 | `~/.cursor/skills/skill-based-architecture` |
-| Cursor 项目级 | `.cursor/skills/skill-based-architecture` |
-| 其他 agent | `skills/skill-based-architecture` 在目标项目内,或 `../skill-based-architecture` 在它旁边 |
+用**任何方式**(`git clone`、download zip、submodule、fork…)把这个仓库放到**任何位置** —— 唯一的要求是**你和 agent 都知道它在哪**。
+
+只要 agent 在被触发时能定位到这个目录就行。如果它不在 agent 的默认搜索路径上(例如 Cursor 的 `~/.cursor/skills/`、`.cursor/skills/`,或项目内的 `skills/`),就在 `CLAUDE.md` / `AGENTS.md` / `.cursor/rules/` 里写一行,告诉 agent 路径在哪。
+
+最常见的放置位置:
+
+- 项目内:`skills/skill-based-architecture/`
+- 项目并排:`../skill-based-architecture/`
+- Cursor 用户级:`~/.cursor/skills/skill-based-architecture/`
+- Cursor 项目级:`.cursor/skills/skill-based-architecture/`
+
+示例(项目内 clone):
 
 ```bash
 git clone https://github.com/WoJiSama/skill-based-architecture.git \
@@ -89,6 +96,18 @@ git clone https://github.com/WoJiSama/skill-based-architecture.git \
 等价触发:"整理项目规则"、"把规则迁移到 skills 目录"、"organize the project rules"。
 
 Agent 会从 [`templates/`](templates/) 复制预制 scaffold 到 `skills/<name>/`,创建薄壳,填充每一个 `<!-- FILL: -->` 标记,跑校验。完整流程:[WORKFLOW.md](WORKFLOW.md)。
+
+### 3. (仅 Codex)手动触发 sub-agent / 并行处理
+
+这个 meta-skill 的几条 workflow 会用到 sub-agent 委派和并行 agent 扇出(见 [`templates/skill/workflows/subagent-driven.md`](templates/skill/workflows/subagent-driven.md)、[`templates/skill/workflows/refactor-fanout.md`](templates/skill/workflows/refactor-fanout.md))。大多数 harness 里仓库内的规则足以让 agent 自己决定何时扇出,直接走默认就行。
+
+**Codex 是例外。** 它的运行环境给 `spawn_agent` 工具加了一条工具级规则:**只有当用户明确要求 sub-agent、delegation 或并行 agent 工作时**,才允许调用 `spawn_agent`。这条工具级规则**优先级高于**仓库里的 `AGENTS.md` / skill 规则 —— 即使 workflow 文档里写了"用 sub-agent",扇出模式也**不会**自动触发。
+
+在 Codex 里如果想让扇出/委派真的发生,触发那句话里要明说:
+
+> "用 skill-based-architecture 重构项目规则,workflow 里需要扇出的步骤**并行起 sub-agent 委派**。"
+
+等价说法:"并行 sub-agent 处理 fan-out 部分"、"用 delegated sub-agents"、"spawn sub-agents in parallel"。
 
 ## 关键特性
 

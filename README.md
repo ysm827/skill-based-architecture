@@ -4,7 +4,7 @@
 
 # Skill-Based Architecture
 
-<p align="left">
+<p align="center">
   <a href="https://github.com/WoJiSama/skill-based-architecture/stargazers">
     <img alt="GitHub stars" src="https://img.shields.io/github/stars/WoJiSama/skill-based-architecture?style=flat&logo=github">
   </a>
@@ -69,11 +69,18 @@ Start with a plain `CLAUDE.md` or `.cursor/rules/workflow.mdc`; upgrade later wh
 
 ### 1. Make this meta-skill available locally
 
-| Use case | Clone target |
-|---|---|
-| Cursor user-level | `~/.cursor/skills/skill-based-architecture` |
-| Cursor project-level | `.cursor/skills/skill-based-architecture` |
-| Other agents | `skills/skill-based-architecture` inside the target project, or `../skill-based-architecture` next to it |
+Pull this repo **any way you want** (`git clone`, download zip, submodule, fork…) to **any location** — the only requirement is that **you and the agent both know where it lives**.
+
+As long as the agent can locate this directory when triggered, the path doesn't matter. If it isn't on the agent's default search path (e.g., Cursor's `~/.cursor/skills/`, `.cursor/skills/`, or the project's own `skills/`), write the path into `CLAUDE.md` / `AGENTS.md` / `.cursor/rules/` so the agent can find it.
+
+Common placements:
+
+- Inside the project: `skills/skill-based-architecture/`
+- Next to the project: `../skill-based-architecture/`
+- Cursor user-level: `~/.cursor/skills/skill-based-architecture/`
+- Cursor project-level: `.cursor/skills/skill-based-architecture/`
+
+Example (clone inside the project):
 
 ```bash
 git clone https://github.com/WoJiSama/skill-based-architecture.git \
@@ -89,6 +96,18 @@ Ask the agent to use the local meta-skill:
 Equivalent triggers: "Organize the project rules", "Migrate rules to skills/", "整理项目规则".
 
 The agent then copies the pre-built scaffold from [`templates/`](templates/) into `skills/<name>/`, creates the thin shells, fills every `<!-- FILL: -->` marker, and runs validation. Full procedure: [WORKFLOW.md](WORKFLOW.md).
+
+### 3. (Codex only) Manually request sub-agent / parallel work
+
+Several workflows in this meta-skill lean on sub-agent delegation and parallel agent fan-out (see [`templates/skill/workflows/subagent-driven.md`](templates/skill/workflows/subagent-driven.md) and [`templates/skill/workflows/refactor-fanout.md`](templates/skill/workflows/refactor-fanout.md)). In most harnesses the in-repo rules are enough — the agent decides on its own when to fan out.
+
+**Codex is the exception.** Its runtime imposes a tool-level rule on `spawn_agent`: it may only be invoked when the user **explicitly** asks for sub-agent, delegation, or parallel agent work. That tool-level rule outranks anything in this repo's `AGENTS.md` or skill files, so the fan-out patterns will **not** fire automatically — even though the workflow documents tell the agent to use them.
+
+If you're in Codex and want the delegation to actually happen, say so in the trigger sentence:
+
+> "Use skill-based-architecture to refactor the project rules; **spawn sub-agents in parallel** for the fan-out steps the workflow describes."
+
+Equivalent phrasings: "delegate via parallel sub-agents", "use sub-agents for this", "并行 sub-agent 处理 fan-out 部分".
 
 ## Key features
 
