@@ -13,11 +13,11 @@ Each check covers a different drift dimension. The columns are intentional: a ch
 | Routing source-of-truth (downstream) | Did SKILL.md / shells drift from `routing.yaml`? | `sync-routing.sh --check` |
 | Shell + activation source-of-truth (self-hosting) | Did this repo's root shells drift from generated content, or `skill.yaml` description drift from `SKILL.md`? | `check-self-shells.sh` |
 | Routing trigger coverage | Do `trigger_examples` actually route to the intended workflow? | `check-self-scenarios.sh` (upstream-only) |
-| Structural budgets | SKILL.md ≤ 100 lines, FILL markers, placeholder residue | `smoke-test.sh` |
+| Structural budgets + content | SKILL.md dual budget (desc ≤ 25 + body ≤ 90), FILL/placeholder residue, broken links, SessionStart-hook presence, description keyword-stuffing, and content conformance (§9, when `conformance.yaml` exists) | `smoke-test.sh` |
 | Growth pressure | Are files growing past evaluation thresholds? | `check-growth-health.sh` *(report-only)* |
 | Orphan rules / references | `rules/` or `references/` files with zero inbound links | `audit-orphans.sh` |
 | Cross-references | Broken inline markdown link targets | `check-cross-references.sh` |
-| **Content presence (downstream)** | Did downstream forget to copy a mandatory upstream section/phrase? | `check-version-conformance.sh <skill> --conformance <upstream-clone>/templates/skill/conformance.yaml` |
+| **Content presence (downstream)** | Did downstream forget to copy a mandatory upstream section/phrase? | `check-version-conformance.sh <skill> --conformance <upstream-clone>/templates/skill/conformance.yaml` — also run by `smoke-test.sh` §9 against the skill's own `conformance.yaml` |
 | **Content presence (upstream-canon)** | Does THIS repo still teach what its templates promise? | `check-version-conformance.sh . --conformance references/self-hosting-conformance.yaml` |
 | UPSTREAM-CHANGES coverage | Downstream-facing edit landed without an update note? | `check-upstream-changes.sh` *(upstream pre-commit)* |
 

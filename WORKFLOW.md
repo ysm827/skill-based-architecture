@@ -111,9 +111,9 @@ bash "skills/$NAME/scripts/sync-routing.sh" "$NAME" --check
 (cd "skills/$NAME" && bash scripts/audit-orphans.sh)
 ```
 
-`smoke-test.sh` covers everything: file existence, line count budgets, placeholder/FILL residue, description word count and trigger phrases, routing-manifest drift, routing completeness (parses Common Tasks and verifies every referenced file exists), description consistency between SKILL.md and Cursor entry, and shell bootstrap consistency. Zero manual input needed.
+`smoke-test.sh` covers everything: file existence, line count budgets, placeholder/FILL residue, description word count / trigger phrases / keyword-stuffing, routing-manifest drift, routing completeness (parses Common Tasks and verifies every referenced file exists), description consistency between SKILL.md and Cursor entry, shell bootstrap consistency, SessionStart-hook presence, broken markdown links, and content conformance (§9, when a `conformance.yaml` exists). Zero manual input needed.
 
-For description-quality judgment (too narrow / too broad / weak trigger phrases) — re-read the `description` block aloud and check it uses the user's actual phrasing. No script substitutes for that.
+For description-quality judgment (too narrow / weak or off-language trigger phrases) — re-read the `description` block aloud and check it uses the user's actual phrasing. `smoke-test.sh` now WARNs on the over-broad / keyword-stuffed case (> 12 quoted phrases), but no script substitutes for the rest of that judgment.
 
 For complex migrations (large projects, heavily scattered rules), follow [`workflows/full-migration.md`](workflows/full-migration.md) for the Phase 1–9 process.
 

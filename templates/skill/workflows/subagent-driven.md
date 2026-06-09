@@ -203,6 +203,8 @@ For each contract:
 
 When a worker returns, the main agent runs **both stages** against its output. Do not merge after only one stage.
 
+> When the worker's output is a **judgment or a discovery** (a bug report, a security finding, an exhaustive search) rather than a mechanical edit, compliance review is necessary but **not sufficient** — see [`../references/subagent-verification.md`](../references/subagent-verification.md) for adversarial verification (refute uncertain findings by independent vote) and loop-until-dry (open-ended discovery).
+
 **Stage A — Spec Compliance**
 
 - [ ] Did the worker produce every file listed in `Outputs`?

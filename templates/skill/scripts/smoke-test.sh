@@ -9,10 +9,11 @@
 # Exit code: 0 = all pass, 1 = failures found.
 #
 # ═══════════════════════════════════════════════════════════════════════
-# 8 CATEGORIES of checks (see corresponding section markers below):
+# 9 CATEGORIES of checks (see corresponding section markers below):
 #
 #   1. Structural Checks          — SKILL.md, rules/, workflows/, gotchas,
-#                                   Cursor registration entry, thin shells exist
+#                                   Cursor registration entry, thin shells exist;
+#                                   SessionStart re-injection hook wired (1d, WARN)
 #   2. Line Count Budgets         — SKILL.md dual budget (description ≤ 25 + body ≤ 90), shells ≤ 60 lines,
 #                                   gotchas/pitfall ≤ $GOTCHAS_MAX_LINES (default 400),
 #                                   no duplicate ## headings in gotchas/pitfall files,
@@ -22,7 +23,8 @@
 #                                   no unreplaced <!-- FILL: --> markers
 #   4. SKILL.md Content Quality   — description ≥ 20 words or enough CJK chars,
 #                                   ≥ 2 quoted trigger phrases in real user
-#                                   language(s), not too broad / workflow-stuffed,
+#                                   language(s), not keyword-stuffed (WARN if
+#                                   > $DESCRIPTION_MAX_TRIGGERS quoted phrases),
 #                                   Common Tasks + Known Gotchas sections exist
 #   5. Routing Completeness       — routing.yaml generated summary/bootstraps match;
 #                                   every file referenced in Common Tasks exists
@@ -34,8 +36,13 @@
 #                                   across all skill .md files resolves to an
 #                                   existing file. Catches "path drift" after
 #                                   partial renames or deletions.
+#   9. Content Conformance        — if a conformance.yaml manifest exists, every
+#                                   section/phrase the upstream contract promises
+#                                   is still PRESENT (catches content drift like a
+#                                   renamed "Task Closure Protocol"). Skipped with
+#                                   no manifest. Runs in full / --phase 8 only.
 #
-# Roughly 50 discrete checks across these 8 categories (count varies slightly
+# Roughly 50 discrete checks across these 9 categories (count varies slightly
 # based on how many rules/workflows/gotchas files the target project has).
 # ═══════════════════════════════════════════════════════════════════════
 #
@@ -52,7 +59,14 @@ GOTCHAS_MAX_LINES="${GOTCHAS_MAX_LINES:-400}"
 COMMON_TASKS_MAX_ROWS="${COMMON_TASKS_MAX_ROWS:-10}"
 DESCRIPTION_MIN_WORDS="${DESCRIPTION_MIN_WORDS:-20}"
 DESCRIPTION_MIN_CJK_CHARS="${DESCRIPTION_MIN_CJK_CHARS:-40}"
+# Description is a coarse activation gate, not a workflow index. More than this
+# many quoted trigger phrases signals workflow-keyword stuffing (Pitfall #3). WARN-only.
+DESCRIPTION_MAX_TRIGGERS="${DESCRIPTION_MAX_TRIGGERS:-12}"
 
+# Maintenance note: this runs under `set -euo pipefail`. Any new `VAR=$(cmd | …)`
+# capture MUST end with `|| true` — a non-zero anywhere in the pipe (grep no-match,
+# or `find skills` when the self-hosting repo has no skills/ dir) otherwise aborts
+# the whole run mid-section with no summary.
 set -euo pipefail
 
 # ── Args ──────────────────────────────────────────────────────────────
@@ -73,16 +87,19 @@ if [[ -z "$NAME" ]]; then
   exit 1
 fi
 
-# Phase→section map. Each phase runs a subset of sections 1–8 below.
+# Phase→section map. Each phase runs a subset of sections 1–9 below.
 # Phase 3: SKILL.md written         → sections 4, 6
 # Phase 4: rules extracted          → sections 1a, 2, 3
 # Phase 5: workflows extracted      → sections 1a, 2, 3
 # Phase 6: references extracted     → sections 1a, 3
-# Phase 7: thin shells + routing    → sections 1b, 1c, 5, 6, 7, 8
-# Phase 8: full verify              → all
+# Phase 7: thin shells + routing    → sections 1b, 1c, 5, 6, 7, 8 (NOT 9)
+# Phase 8: full verify              → all (incl. section 9 content conformance)
 # (no flag)                         → all
+# These --phase numbers map to WORKFLOW.md phases 3–8. WORKFLOW.md "Phase 9"
+# is a separate MANUAL attestation (Rationalizations pressure test), not a
+# smoke-test section; `--phase 9` here is just an alias that re-runs all.
 phase_runs() {
-  # $1 = section number (1..8). Returns 0 (run) or 1 (skip).
+  # $1 = section number (1..9). Returns 0 (run) or 1 (skip).
   [[ -z "$PHASE" ]] && return 0
   case "$PHASE" in
     3) [[ "$1" == "1" || "$1" == "2" || "$1" == "4" || "$1" == "6" ]] ;;
@@ -275,6 +292,25 @@ if sub_runs "1c"; then
   else
     fail ".cursor/rules/ has no .mdc files"
   fi
+
+  # 1d. SessionStart re-injection hook (WARN-only — harness-dependent).
+  # Pitfall #7: on /clear or /compact the harness summarizes context and the
+  # SKILL.md routing table drops out. A SessionStart hook re-injects it. Never
+  # fails — not every harness supports hooks. Only checked when .claude/ exists.
+  # Skill-aware: in a multi-skill repo, having *a* hook is not enough — it must
+  # re-inject THIS skill's router (skills/$NAME/), else $NAME stays unprotected.
+  if [[ -d ".claude" ]]; then
+    if grep -qs 'SessionStart' .claude/settings.json .claude/settings.local.json 2>/dev/null; then
+      SKILL_COUNT=$(find skills -maxdepth 2 -name SKILL.md 2>/dev/null | wc -l | tr -d ' ' || true)
+      if [[ "$SKILL_COUNT" -le 1 ]] || grep -qs "skills/$NAME/" .claude/settings.json .claude/settings.local.json 2>/dev/null; then
+        pass "SessionStart re-injection hook wired for this skill (.claude/settings*.json)"
+      else
+        warn "a SessionStart hook exists but does not reference skills/$NAME/ — in this multi-skill repo this skill's router may not be re-injected after /clear or /compact (Pitfall #7)"
+      fi
+    else
+      warn "no SessionStart hook in .claude/settings*.json — SKILL.md routing can silently drop after /clear or /compact (Pitfall #7); see templates/hooks/session-start"
+    fi
+  fi
 fi
 
 fi  # end section 1
@@ -466,11 +502,19 @@ if [[ -f "$SKILL_MD" ]]; then
   fi
 
   # 4c. description has quoted trigger phrases
-  TRIGGER_COUNT=$(echo "$DESC" | grep -o '"[^"]*"' | wc -l | tr -d ' ')
+  TRIGGER_COUNT=$(echo "$DESC" | grep -o '"[^"]*"' | wc -l | tr -d ' ' || true)
   if [[ "$TRIGGER_COUNT" -ge 2 ]]; then
     pass "description has $TRIGGER_COUNT quoted trigger phrases (≥ 2)"
   else
     fail "description has only $TRIGGER_COUNT quoted trigger phrases (need ≥ 2)"
+  fi
+
+  # 4c-stuffing. Too MANY quoted phrases = workflow-keyword stuffing (Pitfall #3 /
+  # Principle #7). The description is a coarse activation gate, not a workflow
+  # index; enumerating every task's keywords leaks which workflows exist and
+  # competes with Common Tasks routing. WARN-only — judgment call.
+  if [[ "$TRIGGER_COUNT" -gt "$DESCRIPTION_MAX_TRIGGERS" ]]; then
+    warn "description has $TRIGGER_COUNT quoted phrases (> $DESCRIPTION_MAX_TRIGGERS) — likely workflow-keyword stuffing; keep it domain-level, move task keywords to Common Tasks (Pitfall #3)"
   fi
 
   # 4d. Has Always Read section (English or Chinese)
@@ -802,6 +846,35 @@ else
 fi
 
 fi  # end section 8
+
+# ── 9. Content Conformance (manifest-gated) ──────────────────────────
+# Sections 1–8 verify files EXIST and links resolve; none verifies a file still
+# CONTAINS the sections the upstream contract promises. That content drift is how
+# a well-meaning edit (e.g. renaming "Task Closure Protocol" → "Trigger Policy")
+# silently breaks the contract and goes unnoticed until update-upstream. Folding
+# conformance into the one check people run after every change closes that gap.
+# Skipped silently when the skill carries no conformance.yaml.
+if section 9 "Content Conformance (manifest-gated)"; then :
+
+CONF_YAML="$SKILL_DIR/conformance.yaml"
+CONF_SH="$SKILL_DIR/scripts/check-version-conformance.sh"
+if [[ ! -f "$CONF_SH" ]]; then
+  CONF_SH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/check-version-conformance.sh"
+fi
+if [[ -f "$CONF_YAML" && -f "$CONF_SH" ]]; then
+  if CONF_OUT=$(bash "$CONF_SH" "$SKILL_DIR" 2>&1); then
+    pass "content conformance: skill carries every section its conformance.yaml requires"
+  else
+    fail "content conformance drifted — a required section/phrase is missing:"
+    printf '%s\n' "$CONF_OUT" | grep -iE 'FAIL|MISSING' | head -20 | sed 's/^/       /' || true
+  fi
+elif [[ -f "$CONF_YAML" && ! -f "$CONF_SH" ]]; then
+  warn "conformance.yaml present but check-version-conformance.sh missing (vendored dir + fallback) — content conformance NOT verified; re-vendor the conformance checker alongside smoke-test.sh"
+else
+  echo "  (no conformance.yaml — content-conformance check skipped)"
+fi
+
+fi  # end section 9
 
 # ── Summary ───────────────────────────────────────────────────────────
 echo ""

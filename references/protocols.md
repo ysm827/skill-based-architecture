@@ -170,7 +170,7 @@ If a future agent could still miss the lesson while following the normal task pa
 
 ## Skill Activation Verification
 
-Phase 8 checks structural correctness, but doesn't verify the skill actually activates at runtime. Use these additional checks after migration.
+Phase 8 checks structural correctness; full runtime activation still needs human judgment. `smoke-test.sh` now partly automates two of these — it WARNs on a missing SessionStart hook (Pitfall #7, §1d) and on a keyword-stuffed description (§4c). The rest below remain manual. Use these additional checks after migration.
 
 ### Description Quality Check
 

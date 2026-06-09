@@ -156,7 +156,10 @@ check_scripts() {
     [[ -f "$f" ]] || continue
     base="$(basename "$f")"
     case "$base" in
-      smoke-test.sh) max=850 ;;
+      # smoke-test.sh is the monolithic 9-category verifier; cap raised when
+      # hook-presence, description-stuffing, and content-conformance checks were
+      # added. Extract sourced helper files if it passes the cap.
+      smoke-test.sh) max=900 ;;
       sync-routing.sh) max=320 ;;
       check-growth-health.sh) max=220 ;;
       audit-orphans.sh) max=120 ;;

@@ -48,6 +48,91 @@ Downstream refresh agents almost always only read the most recent 3–5 entries.
 
 The archive file has the same format and is read on demand if a downstream agent is investigating a specific historical change. `scripts/check-upstream-changes.sh` only enforces a same-diff entry in `UPSTREAM-CHANGES.md`; archived entries are out of its scope.
 
+## 2026-06-08 - Subagent verification patterns: adversarial verify + loop-until-dry
+
+- Upstream commit: pending in this working tree
+- Changed areas:
+  - **NEW `templates/skill/references/subagent-verification.md`** — two
+    harness-agnostic patterns that extend `subagent-driven.md`'s two-stage
+    review from *worker compliance* to *output correctness + discovery
+    completeness*: (1) **adversarial verification** — for an uncertain finding
+    (bug / security / research claim), dispatch N independent verifiers each
+    contracted to *refute* it, default-to-refuted, keep only on majority
+    survival; perspective-diverse variant gives each verifier a distinct lens.
+    (2) **loop-until-dry** — for open-ended discovery (no known task-list size),
+    dispatch finder rounds, dedup against all-seen, stop after K empty rounds;
+    multi-modal rounds + no-silent-caps. Both carry an explicit "when NOT to
+    reach for these" (mechanically-checkable output or bounded task list → the
+    existing single review is enough).
+  - `templates/skill/workflows/subagent-driven.md` — Phase 3 (Two-Stage Review)
+    gains a one-line pointer to the new reference for the judgment / discovery
+    case (compliance review necessary but not sufficient).
+- Why it matters: the existing subagent surface (`subagent-driven.md`,
+  `refactor-fanout.md`) is built for **decomposable known work** and reviews
+  **worker compliance** (did it follow the contract). It had no pattern for the
+  case where the worker's *conclusion* may be plausible-but-wrong, or where the
+  problem has *no known size* — exactly the gap a multi-agent "exhaustive mode"
+  fills. Distilled to the two harness-agnostic patterns; the harness-specific
+  orchestration API (Claude Code's `Workflow` / parallel-`Task` fan-out
+  primitives) is deliberately **excluded** per `ANTI-TEMPLATES.md` § "Subagent
+  type registries / harness-specific dispatch code" — predefining one harness's
+  dispatch API would lie to every other harness.
+- Downstream refresh guidance: copy `references/subagent-verification.md` whole
+  (project-agnostic) and add the Phase 3 pointer line to your local
+  `subagent-driven.md`. No `routing.yaml` or `conformance.yaml` change required
+  — these are optional optimization patterns, not safety contracts (same posture
+  as `refactor-fanout.md`). On harnesses with no parallel / background dispatch,
+  the patterns degrade to sequential verifier passes — you keep the adversarial /
+  loop discipline, you lose the parallelism. If your project has never needed
+  adversarial verification or open-ended discovery, skip the file and re-pull
+  when the situation actually appears.
+
+## 2026-06-08 - smoke-test.sh: activate hook / stuffing / conformance checks
+
+- Upstream commit: pending in this working tree
+- Changed areas:
+  - `templates/skill/scripts/smoke-test.sh` — three new checks, all closing
+    gaps where a real downstream (`chaos`) drifted while passing the old
+    smoke-test:
+    - **1d SessionStart hook (WARN)** — when `.claude/` exists but no
+      `SessionStart` hook is wired in `.claude/settings*.json`, warn (Pitfall
+      #7: routing silently drops after `/clear` or `/compact`). Never fails —
+      harness-dependent.
+    - **4c-stuffing (WARN)** — description with > `$DESCRIPTION_MAX_TRIGGERS`
+      (default 12) quoted phrases is flagged as workflow-keyword stuffing
+      (Pitfall #3 / Principle #7). The old check only caught *too few* (< 2)
+      quoted phrases; this catches *too many*.
+    - **Section 9 Content Conformance (FAIL)** — if a `conformance.yaml` exists,
+      run `check-version-conformance.sh` so the one check people run after every
+      change also catches *content* drift (e.g. a renamed "Task Closure
+      Protocol"). Skipped silently when no manifest. Runs in full / `--phase 8`
+      only — not in `--phase 7`, so `check-all` self-hosting verify is unaffected.
+  - `templates/skill/scripts/check-growth-health.sh` — raised `smoke-test.sh`
+    soft cap 850 → 900 (the verifier legitimately grew by the three checks above).
+- Why it matters: structural checks (files exist, links resolve, routing in sync)
+  were gated and ran easily; the checks that catch hook/description/content drift
+  existed but were manual ("stored, not activated"). A downstream passed
+  smoke-test green while missing its hook, stuffing its description to 25 quoted
+  phrases, and regressing a conformance-required phrase. These three additions
+  move those checks onto the path that actually runs.
+- Downstream refresh guidance: re-vendor `smoke-test.sh` and
+  `check-growth-health.sh` from this upstream. §9 depends on the conformance
+  checker, so re-vendor `check-version-conformance.sh` + `_parse_conformance.py`
+  as a coupled set (if `conformance.yaml` is present but the checker is missing,
+  §9 now WARNs rather than silently skipping). After re-vendoring, run
+  `bash skills/<name>/scripts/smoke-test.sh <name>` (full, so §9 runs) — new
+  WARNs/FAILs surface pre-existing drift; fix them (wire a SessionStart hook,
+  trim the description, re-add any conformance-required phrase) rather than
+  suppressing the checks. In multi-skill repos the §1d hook check is skill-aware:
+  it only passes when a hook re-injects THIS skill's `skills/<name>/` router.
+- Known remaining gap (by design, not yet closed): the hook (§1d) and stuffing
+  (§4c) checks are WARN-only (harness-dependent / judgment), so re-drift of P1/P3
+  is detected but non-blocking; only conformance (§9) is FAIL-gated. And
+  smoke-test is still human/agent-triggered — no pre-commit or CI auto-runs it
+  downstream. Pick a gate (pre-commit, closure-step, or periodic update-upstream)
+  per project; a `SMOKE_STRICT=1` promote-WARNs-to-FAIL mode can be added when a
+  CI consumer exists.
+
 ## 2026-06-05 - route-health.sh: static routing-quality lint (Tier 1)
 
 - Upstream commit: pending in this working tree
