@@ -11,13 +11,18 @@ templates/
 ├── skill/                    → becomes skills/{{NAME}}/
 │   ├── SKILL.md.template     (renamed to SKILL.md during Quick Start)
 │   ├── routing.yaml            (single source for Always Read + Common Tasks + shell bootstraps)
+│   ├── sync-manifest.yaml      (vendor-class file list consumed by scripts/sync-vendor.sh)
 │   ├── rules/{project-rules,coding-standards,agent-behavior}.md
-│   ├── workflows/{profile-project,plan-feature,update-upstream,update-rules,fix-bug,change-managed,edit-templates,maintain-docs,subagent-driven}.md
+│   ├── workflows/{profile-project,plan-feature,update-upstream,update-rules,fix-bug,change-managed,edit-templates,maintain-docs,subagent-driven,subagent-orchestration}.md
 │   ├── workflows/invoke-skill.md.example  (copy-paste template for Pattern A composition; rename and adapt)
 │   ├── references/{gotchas,behavior-failures}.md
 │   └── scripts/              → automated verification (lives inside the skill)
 │       ├── smoke-test.sh                (fully automated structural + routing checks)
 │       ├── sync-routing.sh              (generate/check routing summary + shell bootstraps from routing.yaml)
+│       ├── sync-vendor.sh               (mechanical vendor-file sync from an upstream clone; base = synced_sha)
+│       ├── upstream-status.sh           (am-I-behind reporter + wrong-checkout guard; reads .upstream-sync)
+│       ├── footprint.sh                 (static per-task read-cost dashboard)
+│       ├── route-health.sh              (static routing-quality lint; advisory)
 │       ├── check-cross-references.sh    (workflows → rules/references staleness heuristic)
 │       ├── check-growth-health.sh       (non-blocking growth pressure report)
 │       ├── audit-orphans.sh             (rules/ + references/ files with zero inbound links)
@@ -63,12 +68,14 @@ Two kinds — each with a different "fill" mechanism:
 | `skill/rules/agent-behavior.md` | ≤ 100 lines, fully pre-filled | Universal coding defaults. Exception to the stub-only rule — ships as content. **Growth gated** by `ANTI-TEMPLATES.md § Admission Threshold` (convention-level, ~30% hostile-prompt block rate). For mechanism-level enforcement install `templates/hooks/agent-behavior-gate.sh` — blocks 100% of tested attack classes deterministically |
 | `hooks/session-start`, `hooks/workflow-state`, `hooks/agent-behavior-gate.sh` | ≤ 150 lines each | Optional hook scripts. Keep per-harness branching in-script; see `hooks/README.md` |
 | `hooks/README.md` | ≤ 150 lines | Per-hook rollout guidance; allowed larger because it documents optional installs + tuning |
-| `skill/workflows/profile-project.md`, `plan-feature.md`, `update-upstream.md`, `fix-bug.md`, `change-managed.md`, `edit-templates.md` | ≤ 100 lines | Task-specific workflows stay lean |
+| `skill/workflows/profile-project.md`, `plan-feature.md`, `update-upstream.md`, `fix-bug.md`, `change-managed.md`, `edit-templates.md`, `subagent-orchestration.md` | ≤ 100 lines | Task-specific workflows stay lean |
 | `skill/workflows/update-rules.md`, `maintain-docs.md`, `subagent-driven.md` | ≤ 250 lines | Protocol-heavy workflows allowed more room |
 | `protocol-blocks/*` | ≤ 40 lines each | One idea per block |
 | `skill/SKILL.md.template` | dual budget: description ≤ 25 lines + body ≤ 90 lines | Same hard cap as downstream SKILL.md (smoke-test enforces both separately). description carries quoted trigger phrases; body navigates rules/workflows/references. Keep each shorter when possible. |
 | `skill/scripts/smoke-test.sh` | ≤ 850 lines (was 800; raised 2026-05-12 for ledger gate). **Next addition forces extraction** into a `check-<concern>.sh` companion script. | Structural test harness; keep scenario behavior out of this script |
-| `skill/scripts/sync-routing.sh` | ≤ 320 lines | Generator/checker for routing.yaml-derived blocks; keep dependency-free |
+| `skill/scripts/sync-routing.sh` | ≤ 340 lines (was 320; raised 2026-06-10 — behavior-block single-source generation legitimately grew it) | Generator/checker for routing.yaml-derived blocks; keep dependency-free |
+| `skill/scripts/sync-vendor.sh` | ≤ 160 lines | Mechanical vendor sync; base check via upstream git history — no new state files |
+| `skill/sync-manifest.yaml` | ≤ 40 lines | Vendor-class file list only; project-owned files never belong here |
 | `skill/scripts/check-growth-health.sh` | ≤ 220 lines | Non-blocking pressure report for line counts, route counts, and script/workflow budgets |
 | `skill/scripts/audit-orphans.sh` | ≤ 120 lines | Zero-inbound report for `rules/` + `references/`; heuristic, run before deleting flagged files |
 | `skill/references/gotchas.md` | ≤ 25 lines (seed) | MUST stay near-empty — content grows post-deployment |

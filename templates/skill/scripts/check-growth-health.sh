@@ -160,7 +160,9 @@ check_scripts() {
       # hook-presence, description-stuffing, and content-conformance checks were
       # added. Extract sourced helper files if it passes the cap.
       smoke-test.sh) max=900 ;;
-      sync-routing.sh) max=320 ;;
+      # sync-routing.sh grew legitimately with behavior-block single-source
+      # generation (2026-06-03); raised 320 → 340. Next growth → extract.
+      sync-routing.sh) max=340 ;;
       check-growth-health.sh) max=220 ;;
       audit-orphans.sh) max=120 ;;
       *) max=220 ;;

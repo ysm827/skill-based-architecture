@@ -37,7 +37,7 @@ When the first read leaves 2+ plausible root causes still alive, serial eliminat
 
 If any condition fails, just inline the most likely one. Fan-out has dispatch overhead.
 
-**How to fan out** — for each hypothesis, dispatch one subagent (per `workflows/subagent-driven.md` Phase 1 contract format):
+**How to fan out** — for each hypothesis, dispatch one subagent (per `workflows/subagent-orchestration.md` Phase 1 contract format):
 
 - **Goal**: confirm or refute the claim "*<single-sentence hypothesis>*"
 - **Inputs**: the specific files / logs / endpoints that would prove or disprove it (do not pass the bug description as a whole — pass only the slice that matters for this hypothesis)

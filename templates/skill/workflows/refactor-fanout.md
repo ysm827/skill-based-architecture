@@ -1,6 +1,6 @@
 # Refactor Fan-out Workflow
 
-> **Pervasive reverse-question — default habit**: Inside this workflow's Phase 2 batch edit (and any other sub-step), ask "Is watching the whole process redundant for the main agent?" If yes → **directly** `spawn_agent` per Subagent Contract format. See [`subagent-driven.md` § Mode 1: Direct Auxiliary Delegation](subagent-driven.md#mode-1-direct-auxiliary-delegation) for the trigger criteria and [`subagent-driven.md` § Mode 2: Four Phases](subagent-driven.md#mode-2-four-phases-when-to-invoke-this-mode) for the full multi-batch orchestration this workflow uses.
+> **Pervasive reverse-question — default habit**: Inside this workflow's Phase 2 batch edit (and any other sub-step), ask "Is watching the whole process redundant for the main agent?" If yes → **directly** `spawn_agent` per Subagent Contract format. See [`subagent-driven.md` § Mode 1: Direct Auxiliary Delegation](subagent-driven.md#mode-1-direct-auxiliary-delegation) for the trigger criteria and [`subagent-orchestration.md`](subagent-orchestration.md) for the full multi-batch orchestration this workflow uses (mode triggers: `subagent-driven.md` § Mode 2).
 
 Use this for refactors that touch **N independent usage points** of the same construct: renaming a function across 30 files, changing an API signature with many callers, extracting an interface with multiple implementations, migrating a config key.
 
@@ -18,12 +18,7 @@ If any condition fails: use `change-managed.md` and do the change sequentially i
 
 ## Harness Compatibility
 
-Same as `workflows/subagent-driven.md`:
-
-| Harness | Support |
-|---|---|
-| Claude Code | Full — native `Task` parallel dispatch |
-| Cursor / Codex / Gemini | Degraded — run sequentially with contract discipline; you keep the safety, you lose the parallelism |
+Same as [`subagent-driven.md` § Harness Compatibility](subagent-driven.md#harness-compatibility-shared-by-both-modes) — full parallel dispatch on Claude Code (and Codex with global authorization); degraded harnesses run the batches sequentially with contract discipline: you keep the safety, you lose the parallelism.
 
 ## Three Phases
 
@@ -43,7 +38,7 @@ Done by the main agent in the main context.
 
 ### Phase 2 — Fan out
 
-For each batch, dispatch one subagent. Use the **Subagent Contract** format from `workflows/subagent-driven.md` Phase 1:
+For each batch, dispatch one subagent. Use the **Subagent Contract** format from `workflows/subagent-orchestration.md` Phase 1:
 
 | Field | What goes here |
 |---|---|
@@ -57,7 +52,7 @@ Dispatch in parallel — batches are independent by Phase 1 construction.
 
 ### Phase 3 — Merge + verify
 
-When workers return, the main agent runs **two stages** per batch (same as `subagent-driven.md` Phase 3):
+When workers return, the main agent runs **two stages** per batch (same as `subagent-orchestration.md` Phase 3):
 
 **Stage A — Spec compliance**
 

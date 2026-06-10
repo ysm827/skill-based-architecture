@@ -2,7 +2,7 @@
 
 > Extends [`../workflows/subagent-driven.md`](../workflows/subagent-driven.md). Its two-stage review checks **worker compliance** — did the worker follow its contract (Stage A) and meet quality bars (Stage B). These two patterns cover what compliance review cannot: **is the worker's conclusion actually correct**, and **did the sweep find everything**. Reach for them only when a subagent's *output is a judgment or a discovery*, not a mechanical edit a test can settle.
 
-Harness-agnostic. "Dispatch a verifier" = your harness's subagent primitive (Claude Code `Task`; degraded mode = reset mental context, re-read only the contract — see `subagent-driven.md` § Degraded Mode). Each verifier / finder is an ordinary Subagent Contract (Goal / Inputs / Outputs / Forbidden / Acceptance), dispatched non-blocking per the Parallelism Premise.
+Harness-agnostic. "Dispatch a verifier" = your harness's subagent primitive (Claude Code `Task`; degraded mode = reset mental context, re-read only the contract — see `../workflows/subagent-orchestration.md` § Degraded Mode). Each verifier / finder is an ordinary Subagent Contract (Goal / Inputs / Outputs / Forbidden / Acceptance), dispatched non-blocking per the Parallelism Premise.
 
 ## When NOT to reach for these
 
@@ -24,7 +24,7 @@ A single review pass — even the two-stage one — can be fooled by a confident
 
 ## Pattern 2 — Loop-until-dry (open-ended discovery)
 
-`subagent-driven.md` Phase 1 assumes you can write the task list up front. For open-ended problems — *find all the bugs*, *every broken link*, *what edge cases are unhandled* — you cannot; a fixed-size sweep silently stops at whatever it happened to find first.
+`subagent-orchestration.md` Phase 1 assumes you can write the task list up front. For open-ended problems — *find all the bugs*, *every broken link*, *what edge cases are unhandled* — you cannot; a fixed-size sweep silently stops at whatever it happened to find first.
 
 **Mechanism.** Dispatch a round of finder subagents, dedup their results against everything seen so far, then repeat. Stop only after **K consecutive rounds (2 is typical) surface nothing new.** The tail rounds are what catch the issues a one-shot sweep misses.
 

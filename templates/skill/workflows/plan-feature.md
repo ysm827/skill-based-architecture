@@ -34,12 +34,7 @@ docs/plans/YYYY-MM-DD-<slug>/
 └── prd.md       ← frontmatter goes here; everything else is your call
 ```
 
-That is the entire required structure. Add whatever else this specific task needs — research notes, decisions log, checklist, evidence quotes — using whatever filenames are natural for the work. Two examples of names that have shown up in past plans (not mandates):
-
-- A decisions log file recording trade-offs as you make them. Lifted into `rules/` or `references/gotchas.md` at closure (step 8).
-- A research/ subfolder for summarized findings, with source paths/URLs alongside quoted snippets.
-
-Do not invent new canonical names just because they appear here. If the task only ever produces `prd.md`, that is correct and complete.
+That is the entire required structure. Add whatever else this specific task needs — research notes, a decisions log (lifted into `rules/` / `references/gotchas.md` at closure, step 8), a research/ subfolder with quoted snippets + source paths/URLs — using natural filenames; none of these names are canonical. If the task only ever produces `prd.md`, that is correct and complete.
 
 Keep `prd.md` short: goal, scope, requirements, acceptance criteria, out of scope, and current open questions. Push supporting material out into sibling files when `prd.md` itself starts to bloat — not preemptively.
 

@@ -12,8 +12,23 @@ files:
   - path: UPSTREAM-CHANGES.md
     notes: |
       Archive policy ~300 lines / 8 entries (see file header).
-      Status 2026-05-12: 374 lines, 14 entries — archive pass overdue.
-      Next pass: move pre-2026-05-09 entries to UPSTREAM-CHANGES-archive.md.
+      2026-06-10: archive pass done — entries at/before the downstream sync
+      point (064f5ac) moved to UPSTREAM-CHANGES-archive.md; main keeps the
+      newest few. Next pass when > ~8 entries / 300 lines again.
+
+  - path: workflows/full-migration.md
+    notes: |
+      2026-06-10: 258 lines vs generic 100 workflow cap — explicit decision:
+      ACCEPT. The 9-phase migration procedure is one linear narrative; phases
+      are not independently navigable, so the split test fails. Revisit only
+      if a phase grows its own sub-procedures.
+
+  - path: scripts/sync-self-shells.sh
+    notes: |
+      2026-06-10: 291 lines vs generic 220 script cap — explicit decision:
+      ACCEPT. Upstream-only whole-shell generator; cohesion beats splitting
+      and the header docs are load-bearing. Revisit only past ~320 lines or
+      if it gains a second concern.
 
   - path: examples/behavior-failures.md
     notes: |

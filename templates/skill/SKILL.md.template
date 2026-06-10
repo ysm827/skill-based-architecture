@@ -12,9 +12,8 @@ primary: true
 
 {{SUMMARY}}
 
-<!-- <always-applicable> / <task-routing> tags below are load-bearing:
-     XML blocks survive context compression better than plain headings.
-     Details: references/thin-shells.md § XML-Tag Injection. -->
+<!-- <always-applicable> / <task-routing> tags below are load-bearing: XML blocks survive
+     context compression better than headings. Ref: references/thin-shells.md § XML-Tag Injection. -->
 
 <always-applicable>
 
@@ -73,8 +72,9 @@ Each entry lists the exact files to read — don't read files not listed for you
 
 <!-- FILL: 3–7 project-specific principles. Each MUST end with a ✓ Check: sentence —
      a concrete post-execution question. Declarative-only principles get "remembered"
-     before acting but have no hook to trigger verification. Examples below are
-     realistic shapes, not your actual rules — replace every one and delete these lines. -->
+     before acting but have no hook to trigger verification. Examples below are realistic
+     shapes, not your rules — replace every one. Good shapes: cross-cutting invariants,
+     architectural rules, style constraints agents keep violating, security/perf guards. -->
 
 1. **Every change ships with a test** — bug fixes and features both require an automated test that fails before the change and passes after.
    ✓ Check: can you name the new test file or test name added in this commit? If not, the change isn't done.
@@ -84,9 +84,6 @@ Each entry lists the exact files to read — don't read files not listed for you
 
 3. **User-facing error messages are typed, not strings** — every user-visible error comes from an enum or typed error class so translations and telemetry can match on it.
    ✓ Check: does every `throw` / `return error` in this change reference a named error type, not a raw string?
-
-<!-- Delete the examples above and write your own. Patterns that work well: cross-cutting invariants, architectural rules,
-     style constraints agents keep violating, project-specific security/perf guards. -->
 
 ## Rule Priority
 1. `skills/{{NAME}}/SKILL.md`

@@ -31,8 +31,27 @@ elif [[ -n "$TARGET" && -f "skills/$TARGET/SKILL.md" ]]; then SKILL_ROOT="skills
 elif [[ -f "SKILL.md" ]]; then SKILL_ROOT="."
 else echo "Usage: bash upstream-status.sh [skill-name|skill-root] [--upstream <url-or-path>]" >&2; exit 2; fi
 
+# Wrong-checkout guard: with multiple checkouts (git worktree), the live skill
+# line exists in exactly one; porting into a stale sibling is the classic miss.
+TOP="$(git rev-parse --show-toplevel 2>/dev/null || true)"
+other_pointers() {
+  [[ -z "$TOP" ]] && return 0
+  local rel; rel="$(cd "$SKILL_ROOT" 2>/dev/null && pwd)"; rel="${rel#"$TOP"}"; rel="${rel#/}"
+  git worktree list --porcelain 2>/dev/null | awk '/^worktree /{print $2}' | while read -r wt; do
+    [[ "$wt" == "$TOP" ]] && continue
+    [[ -f "$wt/${rel:+$rel/}.upstream-sync" ]] && echo "$wt/${rel:+$rel/}.upstream-sync"
+  done
+}
+
 SYNC_FILE="$SKILL_ROOT/.upstream-sync"
 if [[ ! -f "$SYNC_FILE" ]]; then
+  OTHERS="$(other_pointers)"
+  if [[ -n "$OTHERS" ]]; then
+    echo "⚠ WRONG CHECKOUT? No sync pointer here, but sibling checkout(s) have one:"
+    printf '%s\n' "$OTHERS" | sed 's/^/    /'
+    echo "  The live skill line is probably there — do not port into this stale copy."
+    exit 2
+  fi
   echo "No sync point: $SYNC_FILE not found."
   echo "Run workflows/update-upstream.md once — its final step creates this file."
   exit 2
@@ -47,6 +66,15 @@ if [[ -z "$UPSTREAM" || -z "$SYNCED_SHA" || "$SYNCED_SHA" == *"<"* ]]; then
   echo "  current: upstream='$UPSTREAM' synced_sha='$SYNCED_SHA'" >&2
   exit 2
 fi
+
+while IFS= read -r p; do
+  [[ -z "$p" ]] && continue
+  osha="$(grep -E '^synced_sha:' "$p" 2>/dev/null | head -1 | sed -E 's/^synced_sha:[[:space:]]*//')"
+  if [[ -n "$osha" && "$osha" != "$SYNCED_SHA" ]]; then
+    echo "⚠ Sibling checkout has a different sync point: $p (${osha:0:7} vs here ${SYNCED_SHA:0:7})."
+    echo "  Verify THIS checkout is the live skill-maintenance line before porting."
+  fi
+done <<< "$(other_pointers)"
 
 # Get the upstream repo: reuse a local clone if given, else clone to a temp dir.
 CLEAN=""; trap '[[ -n "$CLEAN" ]] && rm -rf "$CLEAN"' EXIT
