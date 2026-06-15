@@ -69,6 +69,17 @@ Update `status` as the task moves. Delete the file when the plan is complete or 
 
 9. **Final readback** — summarize requirements, acceptance criteria, chosen approach, out-of-scope items, and plan directory path.
 
+## Decision Completeness (≠ section completeness)
+
+A complex plan can carry every section this workflow asks for — scope, acceptance criteria, open questions, reading list — and still be missing a load-bearing **decision**. Structural checks (and the smoke-test) verify sections *exist*; they cannot tell you a decision is *absent*. Before marking the plan ready, scan for these recurring blind spots. Each is a cue to *check*, not a section to *add* — keep prd.md short:
+
+- **Failure-mode behavior, not just happy-path + config errors.** If the plan calls an external service or dependency, is its *unreachable / timeout / 5xx* behavior decided — fail-open vs fail-closed, and what state persists? Plans routinely nail "config missing → X" yet leave "dependency down → ?" blank; that blank is usually the most consequential branch.
+- **A contract or schema change carries its artifact, the repo's existing way.** New table, column, enum, or wire format → point to the concrete migration / DDL / schema artifact in the convention the repo already uses, not a prose field list. Pin the load-bearing details (nullability of any column inside a unique key, type/length).
+- **Multi-file dossiers get a consistency pass before freeze.** When a plan splits across siblings, the same decision restated in two files drifts. Diff the overlapping claims — especially any "see Dx / see &lt;file&gt;" cross-reference that may now state the opposite of what it cites.
+- **Open Questions track unresolved *decisions*, and a blocker reads as a blocker.** A missing input value and a "what happens when the dependency is down" decision are both open questions — don't let the second live outside the list. Don't file a hard blocker under a "non-blocking" header.
+
+This scan is judgment, not a script: a missing decision is invisible to section-level checks by definition. What it deliberately does **not** add — a mandatory test-plan or observability section. Those belong to the executing workflow and the project's own standard (which may legitimately make them opt-in), not to every plan.
+
 ## Workflow-State Blocks
 
 [workflow-state:planning]
@@ -98,3 +109,6 @@ Planning is complete. Make sure `prd.md` lists or clearly links to everything th
 - [ ] `prd.md` (or files linked from it) gives the implementer/reviewer their reading list
 - [ ] `.skill-workflow-state` was removed or left with the correct active state
 - [ ] If the plan landed (`status: done`): step 8 was actually performed — every load-bearing conclusion was sorted into `rules/` / `references/gotchas.md` / SKILL.md Pitfalls / "no, pure provenance"; `distilled_to:` frontmatter reflects what was lifted
+- [ ] If the plan calls an external dependency: its unreachable/timeout behavior is decided, not only the config-missing case
+- [ ] Schema/contract changes point to a concrete migration artifact in the repo's existing convention, with unique-key column nullability/type pinned
+- [ ] Multi-file dossier: overlapping claims and every "see Dx" / cross-file reference were diffed for drift before freeze

@@ -48,6 +48,36 @@ Downstream refresh agents almost always only read the most recent 3–5 entries.
 
 The archive file has the same format and is read on demand if a downstream agent is investigating a specific historical change. `scripts/check-upstream-changes.sh` only enforces a same-diff entry in `UPSTREAM-CHANGES.md`; archived entries are out of its scope.
 
+## 2026-06-15 - plan-feature.md: Decision-Completeness scan (distilled from a downstream plan review)
+
+- Upstream commit: pending in this working tree
+- Changed areas:
+  - `templates/skill/workflows/plan-feature.md` — new "## Decision Completeness
+    (≠ section completeness)" subsection (after Complex Steps) + 3 Completion
+    Checklist lines. Cues a plan author to check four recurring *decisions* that
+    pass section-level checks but bite at execution: (1) external-dependency
+    failure behavior (unreachable/timeout/5xx, fail-open vs fail-closed) — not
+    just the config-missing branch; (2) schema/contract changes carrying a
+    concrete migration/DDL artifact in the repo's existing convention, with
+    unique-key column nullability/type pinned, not a prose field list; (3)
+    cross-file consistency in multi-file dossiers (including "see Dx" refs that
+    now contradict Dx); (4) Open-Questions hygiene — track unresolved decisions
+    incl. failure modes, and don't bury a blocker under a "non-blocking" header.
+    Deliberately does **not** add a mandatory test-plan or observability section.
+- Why it matters: distilled from a real downstream complex-plan review. A
+  structurally complete dossier (every required section present) still omitted
+  its single most consequential failure-mode decision (external service
+  unreachable), shipped a load-bearing table as prose with no DDL against a repo
+  that has a hand-written migration convention, and let two sibling files
+  contradict each other (one citing the very decision it reversed). Section-
+  completeness ≠ decision-completeness; the smoke-test cannot detect a *missing*
+  decision, so the cue lives in the planning workflow itself.
+- Downstream refresh guidance: if your downstream keeps a local plan-feature
+  workflow, port the Decision-Completeness subsection + the 3 checklist lines;
+  the cues are universal (no project terms). Preserve any project-specific
+  question gates. If your executing workflow makes backend tests opt-in, keep it
+  — this change deliberately does not mandate a test section.
+
 ## 2026-06-10 - sync-vendor.sh + sync-manifest.yaml: mechanical vendor sync + wrong-checkout guard
 
 - Upstream commit: pending in this working tree
