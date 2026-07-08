@@ -10,12 +10,25 @@ installing it locally.
 ## How To Try It
 
 1. Open the hosted preview or a local agent session.
-2. Provide the files under [`repo/`](repo/) as the target project context.
-3. Ask:
+2. Send this prompt:
 
 ```text
-Use skill-based-architecture to refactor these scattered agent rules into a skills/demo-shop/ source of truth.
+Use skill-based-architecture to refactor this demo repo's scattered agent rules into a skills/demo-shop/ source of truth.
+
+Use the files under:
+https://github.com/WoJiSama/skill-based-architecture/tree/main/examples/simple-repo/repo
+
+Show the proposed skills/demo-shop/ structure and rewrite AGENTS.md, CLAUDE.md, and .cursor/rules/frontend.mdc as thin shells.
 ```
+
+The important input is [`repo/`](repo/), not this README page. If the hosted
+agent cannot read the GitHub folder link, paste the contents of these files into
+the chat before sending the prompt:
+
+- [`repo/AGENTS.md`](repo/AGENTS.md)
+- [`repo/CLAUDE.md`](repo/CLAUDE.md)
+- [`repo/.cursor/rules/frontend.mdc`](repo/.cursor/rules/frontend.mdc)
+- [`repo/README.md`](repo/README.md)
 
 The agent should identify that the project has repeated guidance across
 `AGENTS.md`, `CLAUDE.md`, `.cursor/rules/frontend.mdc`, and `README.md`, then
