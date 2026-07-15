@@ -19,7 +19,7 @@ Each check covers a different drift dimension. The columns are intentional: a ch
 | Orphan content-tier + workflow files | `rules/`/`references/`/`architecture/`/`gotchas/`/`conventions/`/`workflows/` files with zero inbound links (link-reachable). Workflows match by basename (sibling same-dir links + routing `workflow:`/`required_reads` both count); a workflow on no route and referenced by no other workflow is dead weight | `audit-orphans.sh` |
 | Unactivated content files | active-tier files (`architecture/`/`conventions/`/`gotchas/`/`rules/`) on no task route — link-reachable but never read (stored-not-activated) | `route-reachability.sh` |
 | Cross-references | Broken inline markdown link targets | `check-cross-references.sh` |
-| **Content presence (downstream)** | Did downstream forget to copy a mandatory upstream section/phrase? | `check-version-conformance.sh <skill> --conformance <upstream-clone>/templates/skill/conformance.yaml` — also run by `smoke-test.sh` §9 against the skill's own `conformance.yaml` |
+| **Content conformance (downstream)** | Did downstream omit a mandatory phrase or reintroduce a forbidden anti-pattern? | `check-version-conformance.sh <skill> --conformance <upstream-clone>/templates/skill/conformance.yaml` — supports `must_contain` + `must_not_contain`, and is also run by `smoke-test.sh` §9 against the skill's own manifest |
 | **Content presence (upstream-canon)** | Does THIS repo still teach what its templates promise? | `check-version-conformance.sh . --conformance references/self-hosting-conformance.yaml` |
 | UPSTREAM-CHANGES coverage | Downstream-facing edit landed without an update note? | `check-upstream-changes.sh` *(upstream pre-commit)* |
 
@@ -50,7 +50,7 @@ Each check covers a different drift dimension. The columns are intentional: a ch
 |---|---|
 | Upstream maintainer about to commit | `bash scripts/check-all.sh` (full gate) |
 | Upstream maintainer pre-commit hook | `bash scripts/check-all.sh --staged` |
-| Upstream maintainer added a `must_contain` to `templates/skill/conformance.yaml` | Mirror the same anchor into `references/self-hosting-conformance.yaml` if a self-hosting file teaches the same protocol |
+| Upstream maintainer added `must_contain` / `must_not_contain` to `templates/skill/conformance.yaml` | Mirror the same anchor into `references/self-hosting-conformance.yaml` if a self-hosting file teaches the same protocol |
 | Downstream just scaffolded | `bash skills/<name>/scripts/smoke-test.sh <name>` |
 | Downstream `update-upstream` | `smoke-test.sh` + `check-version-conformance.sh <skill> --conformance $tmp/upstream/templates/skill/conformance.yaml` (use upstream's manifest, NOT local — the local file is a snapshot from initial scaffold) |
 | Downstream doc edit | `audit-orphans.sh`, `check-cross-references.sh` |

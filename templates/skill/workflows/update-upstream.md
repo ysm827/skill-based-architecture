@@ -57,7 +57,7 @@ A forked downstream should still scan upstream's `UPSTREAM-CHANGES.md` on a cade
     ```
     If this fails: the upstream upgrade is incomplete. Re-apply the missing template sections (e.g. port the Gate/section text from the upstream workflow file into the downstream one), then re-run. After it passes, sync the local manifest with upstream's so the next refresh starts from a fresh snapshot:
     - **Default case** (local matches a historical upstream version — verify with `git -C "$tmp/upstream" log -p -- templates/skill/conformance.yaml`): replace from upstream as a mechanism-owned file, consistent with Hard Rule #4.
-    - **If you added project-specific `must_contain` entries to local**: do not replace. Merge new upstream entries into local while keeping your additions, then re-run the conformance check against the merged manifest.
+    - **If you added project-specific `must_contain` / `must_not_contain` entries to local**: do not replace. Merge new upstream entries into local while keeping your additions, then re-run the conformance check against the merged manifest.
 11. **Update the sync pointer** — after a successful refresh with passing validation, record the upstream HEAD you synced from, so the next `upstream-status.sh` is precise:
     ```bash
     printf 'upstream: %s\nsynced_sha: %s\nsynced_date: %s\n' \

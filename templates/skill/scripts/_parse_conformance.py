@@ -3,7 +3,7 @@
 
 Emits one tab-delimited record per check, columns:
   KIND  FILE  PHRASE
-where KIND in {CONTAINS, EXISTS}. PHRASE is empty for EXISTS records.
+where KIND in {CONTAINS, NOT_CONTAINS, EXISTS}. PHRASE is empty for EXISTS records.
 
 Schema (subset of YAML, no external deps required):
 
@@ -12,6 +12,8 @@ Schema (subset of YAML, no external deps required):
       must_contain:
         - "phrase 1"
         - "phrase 2"
+      must_not_contain:
+        - "forbidden phrase"
 
   required_files:
     - path: <path>
@@ -52,9 +54,9 @@ def parse(path: Path) -> list[tuple[str, str, str]]:
     records: list[tuple[str, str, str]] = []
     section: str | None = None
     item_indent: int | None = None
-    must_contain_indent: int | None = None
+    phrase_list_indent: int | None = None
     cur_file: str | None = None
-    in_must_contain = False
+    phrase_kind: str | None = None
 
     def flush_exists() -> None:
         if section == "required_files" and cur_file:
@@ -64,31 +66,31 @@ def parse(path: Path) -> list[tuple[str, str, str]]:
         if indent == 0 and body.endswith(":"):
             flush_exists()
             section = body[:-1].strip()
-            item_indent = must_contain_indent = None
+            item_indent = phrase_list_indent = None
             cur_file = None
-            in_must_contain = False
+            phrase_kind = None
             continue
 
         if section not in ("required_sections", "required_files"):
             continue
 
         if (
-            in_must_contain
-            and must_contain_indent is not None
-            and indent >= must_contain_indent
+            phrase_kind is not None
+            and phrase_list_indent is not None
+            and indent >= phrase_list_indent
             and body.startswith("- ")
         ):
             phrase = body[2:].strip().strip('"').strip("'")
             if cur_file and phrase:
-                records.append(("CONTAINS", cur_file, phrase))
+                records.append((phrase_kind, cur_file, phrase))
             continue
 
         if body.startswith("- ") and (item_indent is None or indent <= item_indent):
             flush_exists()
             item_indent = indent
-            must_contain_indent = None
+            phrase_list_indent = None
             cur_file = None
-            in_must_contain = False
+            phrase_kind = None
             payload = body[2:].strip()
             if ":" in payload:
                 k, _, v = payload.partition(":")
@@ -104,10 +106,13 @@ def parse(path: Path) -> list[tuple[str, str, str]]:
             v = v.strip().strip('"').strip("'")
             if k in ("file", "path"):
                 cur_file = v
-                in_must_contain = False
+                phrase_kind = None
             elif k == "must_contain":
-                in_must_contain = True
-                must_contain_indent = indent + 2
+                phrase_kind = "CONTAINS"
+                phrase_list_indent = indent + 2
+            elif k == "must_not_contain":
+                phrase_kind = "NOT_CONTAINS"
+                phrase_list_indent = indent + 2
             continue
 
     flush_exists()

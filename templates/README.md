@@ -27,7 +27,7 @@ templates/
 │       ├── check-cross-references.sh    (workflows → rules/references staleness heuristic)
 │       ├── check-growth-health.sh       (non-blocking growth pressure report)
 │       ├── audit-orphans.sh             (content-tier files with zero inbound links)
-│       └── check-version-conformance.sh (downstream contract: required sections / files present)
+│       └── check-version-conformance.sh (downstream contract: required/forbidden phrases + files)
 ├── shells/                   → becomes repo-root entry files
 │   ├── AGENTS.md / CLAUDE.md / CODEX.md / GEMINI.md
 │   ├── .cursor/rules/workflow.mdc

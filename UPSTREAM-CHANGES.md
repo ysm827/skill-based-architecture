@@ -48,8 +48,16 @@ Downstream refresh agents almost always only read the most recent 3–5 entries.
 
 The archive file has the same format and is read on demand if a downstream agent is investigating a specific historical change. `scripts/check-upstream-changes.sh` only enforces a same-diff entry in `UPSTREAM-CHANGES.md`; archived entries are out of its scope.
 
+## 2026-07-15 - Subagent scheduling: inline default, Net Benefit gate, and no spawn-then-wait
+
+- Upstream commit: pending in this working tree
+- Changed areas: `templates/skill/rules/agent-behavior.md`, `templates/skill/workflows/subagent-driven.md`, orchestration/fix/change/plan/refactor activation paths, rationalizations, behavior-failure evidence, and conformance tooling (`must_not_contain` in the parser/checker plus manifest regression guards).
+- Why it matters: the previous Mode 1 Iron Law mapped any mechanical/time-consuming/result-only sub-step to mandatory dispatch, while a later paragraph said dispatch was invalid when the main agent could only wait. The stronger early rule won in practice: ordinary grep/tests/edits spawned many workers, the main agent entered repeated wait loops, and coordination cost displaced useful work.
+- Downstream refresh guidance: replace mandatory reverse-question/auto-spawn language with an inline default and five-part Admission Gate (independence, result-only consumption, real overlap, positive Net Benefit, bounded fan-out). Port the non-blocking rule: never spawn when the next action is wait; wait only when every remaining critical path depends on already-running workers; never poll-loop. Remove fixed review-agent and one-worker-per-file/test/lens rules. Add local conformance phrases so the old wording cannot return.
+
 ## 2026-07-15 - Restore harness-aware subagent fallback
 
+- Status: superseded by 2026-07-15 - Subagent scheduling: inline default, Net Benefit gate, and no spawn-then-wait
 - Upstream commit: pending in this working tree
 - Changed areas:
   - `templates/skill/workflows/subagent-driven.md` — restores the decision-time fallback from the previously published market snapshot: when Codex or another harness has no proactive subagent authorization, Mode 1 continues inline instead of stalling on its dispatch Iron Law. The fallback is explicitly separated from an unexpected execution-time tool denial, which still follows Interception Transparency.

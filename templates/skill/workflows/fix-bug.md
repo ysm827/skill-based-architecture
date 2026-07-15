@@ -1,6 +1,6 @@
 # Fix Bug Workflow
 
-> **Pervasive reverse-question — default habit**: Before each sub-step, ask "Is watching the whole process redundant for the main agent?" If yes (mechanical + time-consuming + only-need-result) → **directly** `spawn_agent` (global authorization assumed), main conversation only sees the result. See [`subagent-driven.md` § Mode 1: Direct Auxiliary Delegation](subagent-driven.md#mode-1-direct-auxiliary-delegation). **Not limited to specific list**, any sub-step may trigger (running tests / wide grep / batch edit / scanning logs…).
+> **Inline by default.** Delegate only after [`subagent-driven.md` § Delegation Admission Gate](subagent-driven.md#delegation-admission-gate) proves an independent workstream, real overlap, and positive Net Benefit. A grep, single test, command, or narrow edit is not a worker by default.
 
 ## Mandatory Pre-Step (cannot skip)
 
@@ -22,7 +22,7 @@
 4. Identify the root cause — not the first plausible cause, the actual one. **If 2+ plausible hypotheses survive a 30-second think**, see § Hypothesis Fan-out below before reading more code.
 5. Implement the smallest correct fix — no "while we're here" cleanups
 6. Run Fix Impact Analysis — confirm the change did not silently break callers, data flow, or compatibility
-7. Validate: **the same check from step 3 now passes** (fresh evidence — red before, green after; swapping in a different check re-opens the false-green door), plus the smallest relevant regression per Fix Impact Analysis. **Before running tests / build,** ask the reverse-question "主 agent 看这一步的全过程是多余的吗?" — if yes, see [`subagent-driven.md` § Mode 1: Direct Auxiliary Delegation](subagent-driven.md#mode-1-direct-auxiliary-delegation) signals #1 / #2 to optionally dispatch a verify / build subagent (Codex falls back to display isolation).
+7. Validate: **the same check from step 3 now passes** (fresh evidence — red before, green after; swapping in a different check re-opens the false-green door), plus the smallest relevant regression per Fix Impact Analysis. Run the narrow check inline when its result is the next decision. A long independent test/build may be delegated only when real main-thread work continues concurrently; never spawn it and then wait.
 8. **Run Task Closure Protocol** from `workflows/task-closure.md` — mandatory, not optional
 9. If the recording threshold passes, update the appropriate `rules/`, `references/`, or `workflows/` file before ending the task
 10. Records must pass the generalization check — write as reusable knowledge, not project-specific narratives
@@ -37,6 +37,7 @@ When the first read leaves 2+ plausible root causes still alive, serial eliminat
 - ≥ 2 hypotheses are concrete enough to be a single-sentence claim
 - Each one can be **independently verified** by reading a different region of the codebase / a different log slice / a different external check
 - Inspecting them all in one context would consume > 30% of remaining budget
+- Parallel verdicts save more than contract, review, and integration cost
 
 If any condition fails, just inline the most likely one. Fan-out has dispatch overhead.
 
@@ -48,7 +49,7 @@ If any condition fails, just inline the most likely one. Fan-out has dispatch ov
 - **Forbidden Zones**: any file edit; this is read-only investigation
 - **Acceptance Criteria**: the verdict cites at least one specific file:line or log line as evidence
 
-Dispatch in parallel. The main agent reads only the verdicts (not the supporting code traversal each subagent did) and chooses which hypothesis to act on at Step 5.
+If the Delegation Admission Gate still passes, dispatch the minimum independent hypotheses in parallel. Worker count cannot exceed the hypotheses that are actually independent. The main agent prepares synthesis/acceptance work while they run; if every remaining path then depends on verdicts, use one bounded wait rather than polling.
 
 **Degraded harness (Cursor / Codex / Gemini)**: skip the literal dispatch, but still write down the list of hypotheses + the verification region for each before reading code. The discipline of "decide what would refute each, before reading" survives even without subagents.
 

@@ -1,6 +1,6 @@
 # Plan Feature Workflow
 
-> **Pervasive reverse-question — default habit**: Before each sub-step, ask "Is watching the whole process redundant for the main agent?" If yes (mechanical + time-consuming + only-need-result) → **directly** `spawn_agent` (global authorization assumed), main conversation only sees the result. See [`subagent-driven.md` § Mode 1: Direct Auxiliary Delegation](subagent-driven.md#mode-1-direct-auxiliary-delegation). **Not limited to specific list**, any sub-step may trigger (prd inspection / wide exploration / running tests…).
+> **Inline by default.** Planning evidence and decisions normally belong in the main context. Delegate an independent research angle only when [`subagent-driven.md` § Delegation Admission Gate](subagent-driven.md#delegation-admission-gate) proves real overlap and positive Net Benefit; never create one worker per plan file by default.
 
 Use this for planning requests. Only complex plans get a `docs/plans/.../` folder; simple plans stay inline in the conversation unless the user explicitly asks for a file.
 
@@ -81,7 +81,7 @@ A plan that ends in `- [ ] do X / do Y` is a wish list: the implementer — or a
 
 **Produces/Consumes, not bite-sized code blocks:** declaring each task's interface lets a reader open Task 7 and see Task 3's outputs without scrolling back, and lets tasks be built/verified independently. Borrow the *interface declaration* only — **not** the "every step is a 2–5-minute action with full code pasted in" format; that ceremony fights this skill's keep-plans-short stance.
 
-**Handoff is mechanical.** A Task Breakdown maps 1:1 onto a Mode 2 subagent contract ([`subagent-orchestration.md`](subagent-orchestration.md)) — so a plan written this way dispatches with zero re-derivation:
+**Handoff is possible, not automatic.** A Task Breakdown can map 1:1 onto a Mode 2 subagent contract ([`subagent-orchestration.md`](subagent-orchestration.md)) when the tasks are truly independent and the Admission Gate passes. The plan's task count is not the worker count:
 
 | Task Breakdown | → Subagent Contract |
 |---|---|
@@ -108,7 +108,7 @@ For a Large task, examine the problem from several **angles**, each its own file
 | `rollout.md` | sequencing, migration, rollback, verification strategy |
 | `decomposition.md` | build order + parallelizable cut-points (feeds Mode 2 subagent contracts) |
 
-Each angle is an **independent analysis** — ideal for parallel dispatch. When the lenses are independent, fan them out as analysis subagents ([`subagent-driven.md` § Mode 2](subagent-driven.md#mode-2-four-phases-when-to-invoke-this-mode)), one per lens, then **synthesize** their outputs in `prd.md`. That is the "立体" plan: one problem seen from several angles at once, not one linear pass.
+Each angle is an **independent analysis surface**, but not automatically a worker. When several lenses have non-overlapping evidence and positive Net Benefit, the minimum useful subset may run through Mode 2; otherwise analyze them inline and **synthesize** in `prd.md`. Never fan out one worker per lens merely because files exist.
 
 **Angle governance (keep the index and the angles from drifting):**
 
@@ -132,11 +132,11 @@ Update `status` as the task moves. Delete the file when the plan is complete or 
 
 1. **Scan existing rules / gotchas / pitfalls first** — before drafting `prd.md`, glance through `rules/`, `references/gotchas.md` (or any `references/*pitfall*.md`), and SKILL.md § Common Pitfalls for entries that look related to your scope. Read the relevant ones. These are the active constraints; proposing something the existing canon already rejected wastes the plan. Skip if these locations are empty.
 2. **Create the plan directory** — `mkdir docs/plans/YYYY-MM-DD-<slug>` and seed `prd.md`. Do not pre-create empty files; add siblings only when this task actually needs them.
-3. **Inspect first** — gather repo evidence before questioning: similar features, entry points, config, scripts, tests, and current docs. **Before launching a wide search**, ask the reverse-question "主 agent 读完所有命中是多余的吗?" — if yes (typical when ≥ 10 file hits expected), see [`subagent-driven.md` § Mode 1: Direct Auxiliary Delegation](subagent-driven.md#mode-1-direct-auxiliary-delegation) signal #3 to optionally dispatch an explore subagent. Reading 1-5 files to build the planning context is main-agent's job, do it inline.
+3. **Inspect first** — gather repo evidence before questioning: similar features, entry points, config, scripts, tests, and current docs. Use anchored searches and minimal reads inline. A wide inventory may be delegated only when the main agent needs a compact result, has concurrent planning work, and the Admission Gate passes; do not delegate ordinary `rg` or the files needed for the decision itself.
 4. **Question gate** — classify each possible question through Gate A/B/C; ask only the highest-value next question.
 5. **Define scope** — write requirements, acceptance criteria, and out-of-scope items in `prd.md`.
 6. **Diverge, then record decisions** — when an approach choice exists, first generate ≥ 2 genuinely distinct options (§ Brainstorm), not one plan + strawmen; for Large / ambiguous work, present the design and get buy-in before the Task Breakdown. Then write the trade-off down. Where exactly is your call: inline in `prd.md` if it's a single line; in a sibling file (name it whatever fits) if it grows enough that `prd.md` would suffer. These notes are intra-plan and mutable — they freeze with the plan archive on close. Load-bearing entries get lifted into the live structure at step 8.
-7. **Prepare execution context** — make sure `prd.md` (or files clearly linked from it) gives the implementer and the reviewer everything they need to read first. No required filename or format for this — write it however it stays readable. **If implementation is multi-hour with multiple independent subtasks**, the work qualifies for [`subagent-driven.md` § Mode 2: Four Phases](subagent-driven.md#mode-2-four-phases-when-to-invoke-this-mode) — `prd.md`'s reading list maps to each subagent contract's `Inputs` field, and you should plan the cut-points (which files each implementer owns, which are shared, which are forbidden) now while the scope is fresh.
+7. **Prepare execution context** — make sure `prd.md` (or files clearly linked from it) gives the implementer and the reviewer everything they need to read first. No required filename or format for this — write it however it stays readable. For multi-hour work, identify cut-points, but invoke Mode 2 only for the subset that is independently executable and net-positive after coordination cost; keep serial/core work with the main agent.
 8. **On closure: lift load-bearing content into the live structure** — when `status` flips to `done`, sort every conclusion (wherever in the plan directory it landed) into one of three buckets:
 
    - **"Future work must / must not do X"** (a constraint that binds tasks beyond this plan) → add to a `rules/<topic>.md` file. Routing pulls `rules/` onto every relevant task path, so the constraint is read automatically.

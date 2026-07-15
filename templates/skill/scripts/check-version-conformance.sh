@@ -93,6 +93,17 @@ while IFS=$'\t' read -r kind file phrase; do
         fail_msg "$file <- MISSING: $phrase"
       fi
       ;;
+    NOT_CONTAINS)
+      if [[ ! -f "$target" ]]; then
+        fail_msg "$file -- file missing (cannot scan forbidden phrase: $phrase)"
+        continue
+      fi
+      if grep -qF "$phrase" "$target"; then
+        fail_msg "$file <- FORBIDDEN: $phrase"
+      else
+        pass_msg "$file <- does not contain: $phrase"
+      fi
+      ;;
     EXISTS)
       if [[ -e "$target" ]]; then
         pass_msg "$file <- exists"

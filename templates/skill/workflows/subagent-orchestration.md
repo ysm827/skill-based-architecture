@@ -1,6 +1,6 @@
 # Workflow: Subagent Orchestration (Mode 2 — Four Phases)
 
-> This is **Mode 2 of [`subagent-driven.md`](subagent-driven.md)** — the full orchestrator pattern for work planned as multi-subtask from the start. Read `subagent-driven.md` first for the mode triggers (§ Mode 2: When to Invoke), the Iron Law, the Parallelism Premise, the Negative list, the Interception Transparency Rule, and the shared Rationalizations / Red Flags — they all bind Mode 2 dispatches too.
+> This is **Mode 2 of [`subagent-driven.md`](subagent-driven.md)** — the full orchestrator pattern for work planned as several independent workstreams. Read its Delegation Admission Gate, Main-Thread Non-Blocking Rule, count discipline, Negative list, and Rationalizations first. A plan with many tasks does not automatically justify many workers.
 
 ### Phase 1 — Plan
 
@@ -29,6 +29,8 @@ For each contract:
 3. Include the **Iron Law header** ("NO TASK IS COMPLETE WITHOUT A TASK CLOSURE PROTOCOL SCAN" — main work + 30-second AAR + record-if-needed) so the worker knows Task Closure Protocol applies to them too.
 4. Dispatch workers **in parallel** when their contracts have no ordering dependency — emit the independent dispatches **in a single message** (multiple `Task` calls at once) so they run concurrently, or give each `run_in_background` and keep working. Dispatching one worker in the foreground and blocking on it before sending the next is a defect unless a data dependency forces the order.
 
+Spawn no more workers than independent workstreams, and no more than produce positive incremental Net Benefit. After dispatch, continue the named main-thread synthesis/integration work immediately. Wait only when all remaining critical paths depend on workers, and never enter a repeated polling loop.
+
 **Dispatch discipline:**
 
 - Require a **Return Status**: the worker must end its report with exactly one of `DONE` / `DONE_WITH_CONCERNS` / `NEEDS_CONTEXT` / `BLOCKED` (defined in [`../protocol-blocks/subagent-contract.md`](../protocol-blocks/subagent-contract.md) § Worker Return Status). Phase 4 routes on this word.
@@ -49,7 +51,7 @@ When a worker returns, the main agent runs **both stages** against its output. D
 - [ ] Does every acceptance criterion pass when executed literally?
 - [ ] Are there drive-by changes not covered by the contract? (Drive-bys are defects even if they look helpful.)
 
-If any Stage A check fails → **reject and re-dispatch** with a corrected contract. Do not patch the worker's output inline in the main context; that re-pollutes the main window.
+If any Stage A check fails → reject the output, then run the Net Benefit gate again: re-dispatch when the remaining correction is still an independent workstream; otherwise fix it inline under main-agent review. Do not preserve a worker merely because one was already started.
 
 **Stage B — Quality Review**
 
@@ -59,7 +61,7 @@ If any Stage A check fails → **reject and re-dispatch** with a corrected contr
 - [ ] Task Closure Protocol 30-second AAR scan on the delta (see [SKILL.md](../SKILL.md) Principle 10)
 - [ ] Recording threshold (2/3) applied to any new findings
 
-If Stage B finds issues but Stage A passed → record the issues, then decide: re-dispatch (preferred for non-trivial issues) or accept with a follow-up contract queued.
+If Stage B finds issues but Stage A passed → record the issues, then choose inline correction, re-dispatch, or a follow-up contract by current dependency shape and Net Benefit. Re-dispatch is not a default.
 
 ### Phase 4 — Merge or Reject
 
@@ -74,7 +76,7 @@ If Stage B finds issues but Stage A passed → record the issues, then decide: r
 **Mechanics:**
 
 - **Merge** (the DONE / DONE_WITH_CONCERNS branch, both stages passing): write one summary line per merged contract into the running task log.
-- **Reject** (the re-dispatch branch): cancel the worker's changes (`git restore`, revert the diff, or discard the worker's patch). Rewrite the contract. Re-dispatch. Do **not** fall into the "I'll just fix it myself in the main context" trap.
+- **Reject**: discard or isolate the worker's changes, then re-run the Admission Gate. Rewrite/re-dispatch only if the remaining work still qualifies; otherwise continue inline.
 
 ---
 

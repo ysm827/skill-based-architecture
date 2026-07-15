@@ -40,6 +40,9 @@ required_sections:
       - "## Complex Plan"
       - "prd.md"
       - "[workflow-state:planning]"
+    must_not_contain:
+      - "Pervasive reverse-question — default habit"
+      - "one per lens"
 
   # task-closure.md is the canonical home for the cross-cutting closure gate.
   # Every downstream workflow that runs the closure gate references this file.
@@ -65,6 +68,43 @@ required_sections:
     must_contain:
       - "## Mandatory Pre-Step"
       - "Task Closure Protocol"
+    must_not_contain:
+      - "Pervasive reverse-question — default habit"
+      - "directly `spawn_agent`"
+
+  # Delegation is optional and net-benefit-driven. These phrases prevent the
+  # old "mechanical step => mandatory spawn" and spawn-then-wait behavior from
+  # returning during downstream refreshes.
+  - file: rules/agent-behavior.md
+    must_contain:
+      - "## 7. Delegate Only for Net Benefit"
+      - "Inline is the default"
+      - "Never spawn if the next main-thread action would be waiting"
+    must_not_contain:
+      - "must directly call `spawn_agent`"
+      - "continuous self-judgment + auto-dispatch"
+
+  - file: workflows/subagent-driven.md
+    must_contain:
+      - "### Delegation Admission Gate"
+      - "Positive Net Benefit"
+      - "worker count must not exceed the number of independent workstreams"
+      - "Do not spawn a worker if the next main-thread action would be waiting"
+      - "Do not repeatedly poll"
+    must_not_contain:
+      - "Iron Law (violation = task failure"
+      - "must directly call `spawn_agent`"
+      - "continuous self-judgment + auto-dispatch"
+
+  - file: workflows/change-managed.md
+    must_not_contain:
+      - "Pervasive reverse-question — default habit"
+      - "directly `spawn_agent`"
+
+  - file: workflows/refactor-fanout.md
+    must_not_contain:
+      - "batch by physical region anyway to enable parallel dispatch"
+      - "Full test suite passes"
 
 # Files required to exist (presence-only check).
 required_files:
@@ -75,4 +115,6 @@ required_files:
   - path: workflows/maintain-docs.md
   - path: workflows/update-upstream.md
   - path: references/minimal-sufficient-context.md
+  - path: workflows/subagent-driven.md
+  - path: rules/agent-behavior.md
   - path: routing.yaml

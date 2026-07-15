@@ -78,8 +78,16 @@ Origin: condensed from [OthmanAdi/planning-with-files](https://github.com/Othman
 - Correct objective errors neutrally. Do not infer the user's stance or motive; distinguish questions from claims before challenging.
 ✓ Check: can every sentence justify its utility to the user's explicit request? If not, delete it.
 
+## 7. Delegate Only for Net Benefit
+**Inline is the default. Delegation is an optimization, not a quota.**
+- Spawn only for an independent workstream that can overlap real main-thread work and saves more than startup, coordination, review, merge, and rework cost.
+- Keep single reads, ordinary searches, one command, one-file edits, and one narrow test inline unless a concrete parallel gain proves otherwise.
+- Worker count must not exceed independent workstream count. Never split one contract by file/test just to fill slots.
+- Never spawn if the next main-thread action would be waiting; keep working until every remaining critical path depends on an already-running worker, then use at most a bounded/event-driven wait — never a poll loop.
+✓ Check: can you name both the independent workstream and what the main agent does concurrently? If not, stay inline.
+
 ## When to Override
 
-For trivial edits (typo fix, one-line comment, dependency version bump) use judgment — the full rigor isn't always warranted; for any non-trivial change, all six apply. Project-specific overrides go in `rules/project-rules.md` and must cite the reason (e.g. "rapid prototyping phase, simplicity first suspended until Milestone 2").
+For trivial edits (typo fix, one-line comment, dependency version bump) use judgment — the full rigor isn't always warranted; for any non-trivial change, all seven apply. Project-specific overrides go in `rules/project-rules.md` and must cite the reason (e.g. "rapid prototyping phase, simplicity first suspended until Milestone 2").
 
 Activation auditing ("are these defaults actually working, or just stored?") lives in [`references/agent-behavior-meta.md`](../references/agent-behavior-meta.md).
