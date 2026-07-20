@@ -37,11 +37,11 @@ Universal defaults for any agent working inside this skill. Project-specific ove
 
 ## 5. Goal-Driven Execution
 
-- Translate the request into observable success criteria before editing.
-- For multi-step work, give each step a concrete check and keep iterating until the checks pass.
-- After three failed approaches, stop and report the attempts, evidence, and likely false premise before trying again.
+- Convert the request into one observable goal, explicit boundaries/non-goals, and acceptance evidence before editing; re-anchor only when discovery changes the frame.
+- For multi-step work, give each step a concrete check. Run scoped, reversible work end-to-end; pause only at a blocking choice, authorization boundary, or shared/irreversible action.
+- Treat rankings and process metrics as diagnostic signals, not objectives; question opaque rubrics or task mix, and do not suppress necessary exploration or evidence to improve a score. After three failed approaches, stop and report the attempts, evidence, and likely false premise before trying again.
 
-✓ Check: can you point to fresh evidence for each claimed outcome, and did the frame change between failed attempts?
+✓ Check: can you name the goal, non-goals, acceptance evidence, and next real approval boundary; did discovery change the frame, or did execution merely drift?
 
 ## 6. Delegate Only for Net Benefit
 

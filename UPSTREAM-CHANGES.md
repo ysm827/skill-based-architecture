@@ -48,6 +48,16 @@ Downstream refresh agents almost always only read the most recent 3–5 entries.
 
 The archive file has the same format and is read on demand if a downstream agent is investigating a specific historical change. `scripts/check-upstream-changes.sh` only enforces a same-diff entry in `UPSTREAM-CHANGES.md`; archived entries are out of its scope.
 
+## 2026-07-20 - Goal contracts and risk-sized checkpoints
+
+- Upstream commit: pending in this working tree
+- Changed areas:
+  - `templates/skill/rules/agent-behavior.md` — Goal-Driven Execution now starts from one observable goal, explicit non-goals, and acceptance evidence; scoped reversible work runs through its checks without per-step approval, while real decision, authority, shared, or irreversible boundaries still pause.
+  - The same rule distinguishes purposeful discovery from execution drift and treats rankings/process metrics as diagnostic signals rather than objectives; opaque rubrics or task mix cannot justify suppressing necessary exploration or evidence.
+  - `templates/skill/references/agent-behavior-meta.md` records the activation signals and corrects the existing principle 6/7 origin mapping; `templates/skill/conformance.yaml` protects the three load-bearing phrases.
+- Why it matters: blanket approval checkpoints raise user cost, while no checkpoints blur authority and decision boundaries. The risk-sized contract preserves autonomous closure for safe work without optimizing behavior for an opaque score or mistaking necessary discovery for drift.
+- Downstream refresh guidance: reconcile the three Goal-Driven Execution bullets in place instead of appending a new principle. Preserve project-specific permission rules, validation commands, and stricter shared/production controls. No new file, route, index, or placeholder is required; run conformance and the normal skill structure checks after adoption.
+
 ## 2026-07-17 - Simplify default scaffold and make integrity checks truthful
 
 - Upstream commit: branch `codex/simplify-template-maintenance-20260717` (`96cd072` plus the conformance literal follow-up)

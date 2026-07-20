@@ -54,6 +54,9 @@ required_sections:
   - file: rules/agent-behavior.md
     must_contain:
       - "## 4. Minimal Context, Sufficient Evidence"
+      - "explicit boundaries/non-goals"
+      - "Run scoped, reversible work end-to-end"
+      - "diagnostic signals, not objectives"
       - "## 6. Delegate Only for Net Benefit"
       - "Inline is the default"
     must_not_contain:
