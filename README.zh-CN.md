@@ -143,7 +143,7 @@ Agent 会从 [`templates/`](templates/) 复制预制 scaffold 到 `skills/<name>
 - **两层路由**:`SKILL.md` 维护一个生成的 **Always Read** 列表;**Common Tasks** 仅在需要时把 agent 路由到额外文件。下游用 `routing.yaml` 作可编辑的单一路由源。
 - **薄壳 + 路由 bootstrap**:每个入口文件嵌入指向 `routing.yaml` 的短 bootstrap。路由表不在每个 shell 里复制 —— 自然语言指令在长会话压缩中会丢失。
 - **description 即触发条件**:用用户实际语言的领域级激活短语,不是 workflow 关键字堆砌。改完后**朗读一遍** —— 听起来不像真用户就重写,脚本替代不了这件事。
-- **Session Discipline + Task Closure**:同一 session 每个新任务重读 SKILL.md;非小任务以 30 秒 AAR + 记录阈值结束,不允许"测试通过=完成"。
+- **Session Discipline + Task Anchor + Task Closure**:每个新任务重新匹配 route;一个明确动作/检查直接执行,其他任务建立 Goal + Done When,只展示对用户有用的对齐信息,并使用当前工具原生 Plan 推进而不在对话中重复步骤;每个主步骤前运行紧凑 Anchor Checkpoint,只有目标级新鲜证据齐全才闭合。循环只存在于当前 Session,不创建计划文件。详见 [Task Anchor 设计](docs/task-anchor-native-plan.md)。
 - **自维护**:行数信号触发评估而非自动操作;split/merge 流程 + 新鲜度检查保持文档精简。
 - **跨 harness**:Cursor、Claude Code、Codex、Windsurf、Gemini、OpenCode、AGENTS.md 类工具均兼容。
 
@@ -173,8 +173,10 @@ Agent 会从 [`templates/`](templates/) 复制预制 scaffold 到 `skills/<name>
 | 文件 | 内容 |
 |---|---|
 | [SKILL.md](SKILL.md) | Skill 入口:何时使用、目标结构、核心原则 |
+| [docs/sba-bible.md](docs/sba-bible.md) | SBA 产品信念、发展方向与重大机制的决策门禁 |
 | [WORKFLOW.md](WORKFLOW.md) | 迁移指南:Quick Start scaffold、9-phase 流程、下游升级 |
-| [TEMPLATES-GUIDE.md](TEMPLATES-GUIDE.md) | 模板族注释指南 + Task Closure Protocol |
+| [TEMPLATES-GUIDE.md](TEMPLATES-GUIDE.md) | 模板族注释指南 + Task Execution / Task Closure |
+| [docs/task-anchor-native-plan.md](docs/task-anchor-native-plan.md) | Task Anchor、原生 Plan、Workflow 与 Closure 的用户视角设计 |
 | [REFERENCE.md](REFERENCE.md) + [references/](references/) | layout(含 positioning)、progressive-rigor、thin-shells、protocols、conventions |
 | [EXAMPLES.md](EXAMPLES.md) + [examples/behavior-failures.md](examples/behavior-failures.md) | 迁移形态、项目形态、真实压力测试失败 |
 | [templates/](templates/) | 字节级 scaffold,直接复制到下游 |

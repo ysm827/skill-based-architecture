@@ -48,6 +48,64 @@ Downstream refresh agents almost always only read the most recent 3–5 entries.
 
 The archive file has the same format and is read on demand if a downstream agent is investigating a specific historical change. `scripts/check-upstream-changes.sh` only enforces a same-diff entry in `UPSTREAM-CHANGES.md`; archived entries are out of its scope.
 
+## 2026-07-23 - Orthogonal domain context and knowledge-retirement integrity
+
+- Upstream commit: pending in this working tree
+- Changed areas:
+  - `sync-routing.sh` accepts optional `domain_overlays` that append domain reads without replacing the one task route's workflow. Overlay-enabled generated entries keep only current-Session `task_route_id`, `domain_overlay_ids`, and `merged_required_reads`; the default scaffold declares no overlay and exposes no extra routing concept.
+  - Cross-owner reads use project-declared `owner_roots` plus `owner:<owner-id>:<path>`. `--workspace-root` verifies real targets and rejects undeclared owners, absolute/traversal paths, boundary escape, and missing files; without it the check explicitly reports target existence as unverified. No project/app whitelist is embedded upstream.
+  - `audit-orphans.sh` recursively scans nested content; `route-reachability.sh` treats recursively nested `references/business/` leaves as active knowledge that must be reachable from a task route or overlay. Routing line-budget reporting keeps optional overlays separate from the task core.
+  - Business-model and Plan/Closure/Update Rules guidance conditionally requires source, destination, owner, activation, and fitted validation before durable knowledge is retired. Existing Plans or temporary migration records carry the proof; no permanent dossier, fixed ledger, or ordinary-task double maintenance is introduced.
+  - The SBA Bible and runtime workflows state that load-bearing conclusions cannot be silently overwritten when evidence changes, and normative business judgments require business-owner confirmation. This adds no proposed/confirmed/superseded state protocol.
+  - Verification now binds each material risk to fitted evidence and an explicit stop/escalation condition before checks run. Task Execution and Closure stop when that contract is satisfied and escalate only on failed evidence, a newly crossed boundary, or remaining uncertainty; test count is not treated as evidence quality.
+- Why it matters: a downstream migration made nested business knowledge unreachable while structural checks stayed green, and domain routes competed with task workflows. The absorbed mechanism repairs activation and reviewability while leaving project domains, owner names, and migration inventory downstream-owned.
+- Downstream refresh guidance: re-vendor the routing/integrity scripts and workflow clauses only if the project has real domain leaves or knowledge retirement pressure. Preserve project task routes and domain names. Add `domain_overlays` only for existing independently activated business knowledge; declare real owner roots and make assembly pass `--workspace-root`. Do not copy another project's app whitelist, trigger list, ledger, or legacy paths.
+
+## 2026-07-23 - SBA product Bible and direction route
+
+- Upstream commit: pending in this working tree
+- Changed areas:
+  - NEW `docs/sba-bible.md` fixes the product boundary: SBA remains a Skill that improves how the current Agent uses its harness-native Plan, Subagent, and tools; it does not become an Agent OS, task/state platform, resident service, or independent scheduler. It also records the product owner's highest goal: ordinary project members should clone/pull a complete, reliable Agent rule system without becoming Skill authors or carrying complexity SBA can absorb.
+  - The Bible turns three expectations into product direction: build a sufficiently complete decision view, judge direction without a standard answer, and coordinate other agents/tools through standards and contracts to produce verified outcomes.
+  - `references/self-hosting-routing.yaml` adds the self-hosting-only `product-direction` route. SBA positioning, external capability absorbs, and major mechanism decisions now read the Bible before `plan-feature.md`; ordinary tasks and downstream templates do not load or copy it.
+  - README/REFERENCE discovery links, route scenarios, and self-hosting conformance protect the activation path and load-bearing language.
+- Why it matters: isolated principles can optimize local workflows while the product drifts toward more author vocabulary, more centralization, or more activity without better judgment. A stable product constitution gives future choices a common direction and an explicit rejection gate.
+- Downstream refresh guidance: no downstream refresh impact. This is upstream product intent and self-hosting routing only; do not copy the Bible into project skills or add it to downstream Always Read sets.
+
+## 2026-07-22 - Subagent provenance and vendor path ownership guards
+
+- Upstream commit: pending in this working tree
+- Changed areas:
+  - `templates/skill/protocol-blocks/subagent-contract.md` and all dispatch/review consumers add `Task Ref` plus the bounded `explore | implement | review | verify` Role, then require returned Evidence for Context Read, Files Changed, Checks Run, and Remaining Risks.
+  - Worker Evidence is explicitly an index for context provenance, not completion proof; the main agent still checks actual paths/diff, Forbidden Zones, and reruns Acceptance Criteria before advancing the owning Native Plan step.
+  - `templates/skill/workflows/update-upstream.md` now classifies vendor, project-owned, generated, and runtime-data owners. Unlisted paths default to project-owned; generated output comes from its generator; runtime data stays local/gitignored.
+  - `sync-vendor.sh` parses only the `vendor:` block and rejects paths outside `sync-manifest.yaml`, `protocol-blocks/**`, and `scripts/**`, plus absolute/traversal paths and any destination with a symlink component. The upstream suite covers section isolation and each rejection class.
+  - Downstream conformance protects both contracts without adding a task database, provenance log, or centralized ownership manifest.
+- Why it matters: a worker's confident summary cannot establish what context it used, and a permissive manifest parser can accidentally turn project-owned/generated/runtime paths into mechanically overwritten vendor files. A bounded envelope and default-deny write boundary make both claims reviewable without persistent coordination machinery.
+- Downstream refresh guidance: re-vendor `protocol-blocks/subagent-contract.md` and `scripts/sync-vendor.sh`; reconcile Task Ref/Role/Evidence wording across local subagent workflows and plan handoffs; port the four owner classes into `update-upstream.md`; update the local conformance snapshot after validation. Preserve stricter local Forbidden Zones, runtime-data ignore rules, and project-specific workflows; do not introduce a provenance datastore or move project-owned paths into `vendor:`.
+
+## 2026-07-22 - Semantic completeness before minimality
+
+- Upstream commit: pending in this working tree
+- Changed areas:
+  - `templates/skill/rules/agent-behavior.md` replaces Simplicity First with **Semantic Completeness Before Minimality**: Product Development is the default; agents trace invariant, ownership/provenance, producer-to-consumer call chain, and all full/incremental/read/write paths before choosing repair depth. Minimality becomes a tie-breaker among semantically complete solutions.
+  - `templates/skill/workflows/fix-bug.md` adds a Repair-depth gate between root-cause discovery and implementation; `change-managed.md` adds the same ownership and semantic-fan-out ordering for features/refactors.
+  - Operational Stabilization is now an explicit exception for production incidents, hotfix/availability containment, stop-the-bleeding work, or frozen scope. Containment must be reversible and report that structural repair remains unresolved.
+  - Conformance and self-hosting scenarios protect the default mode, invariant-owning boundary, cross-path inspection, and minimality ordering.
+- Why it matters: an availability-first default can produce a locally usable patch while leaving the real invariant broken, such as mutating a collection without tracing its immutable owner or updating one incremental path without the shared filter used by the full path. Dependency count measures repair risk; it must not silently redefine correctness.
+- Downstream refresh guidance: replace or reconcile existing Simplicity First wording rather than appending another Always Read principle. Port the Repair-depth gate into bug and managed-change workflows, preserve stricter project-specific production controls, then validate both an ownership/mutation case and a full-vs-incremental invariant case.
+
+## 2026-07-21 - Task Anchor and harness-native execution plans
+
+- Upstream commit: pending in this working tree
+- Changed areas:
+  - NEW `templates/skill/workflows/task-execution.md` — classifies Simple / Managed / Design tasks; Managed tasks establish Goal, Done When, optional material Boundaries, and a task-specific Plan using the harness's native Plan/Task surface. Anchor state is separate from presentation: natural-language alignment is the default, visible Native Plan steps are not duplicated in chat, and a complete structured brief is reserved for long, complex, scope-sensitive, confirmation-dependent, or no-native-Plan work. Before every main step, a compact Anchor Checkpoint re-centers Goal, remaining evidence, the step check, and relevant Boundaries; it repeats after correction, failed/surprising evidence, Subagent return, or interruption. The loop owns runtime progress, evidence-backed advancement, replanning, and new-message handling entirely inside the current Session, with no planning-file persistence.
+  - `agent-behavior.md`, generated Session Discipline/Auto-Triggers, and self-hosting shells activate the protocol after routing while preserving zero ceremony for one clear action/check.
+  - Fix Bug, Change Managed, Plan Feature, Subagent, and Task Closure workflows now share an explicit boundary: Workflow owns reusable domain procedure; Task Anchor owns the current outcome; Native Plan owns current step state; Closure decides completion only after Goal-level evidence.
+  - `conformance.yaml`, scenario checks, guides, README files, and `docs/task-anchor-native-plan.md` protect and explain the user-visible behavior and non-goals (no task database, fixed three-file schema, or cross-tool state sync).
+- Why it matters: routing can select the right Workflow while a long Session still drifts away from the user's current goal. A fixed labeled Anchor block can also interrupt ordinary conversation and duplicate the native Plan. Proportional presentation keeps user-visible ceremony matched to task risk, while the internal Recitation Loop keeps the full Anchor in working attention without turning the Skill into a persistent task engine.
+- Downstream refresh guidance: add `workflows/task-execution.md` as a non-vendor reusable workflow, port the Goal-Driven Execution, Recitation Loop, and shell activation lines, reconcile local Domain Workflow gates rather than replacing them, and add the Closure Entry Gate. Preserve local validation/permission boundaries and use the local harness's native Plan capability; do not introduce durable planning files, recovery scripts, or cross-Session state for this mechanism.
+
 ## 2026-07-20 - Goal contracts and risk-sized checkpoints
 
 - Upstream commit: pending in this working tree

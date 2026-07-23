@@ -30,7 +30,7 @@
 2. **入口薄壳** —— `AGENTS.md / CLAUDE.md / CODEX.md / GEMINI.md / .cursor/rules`。**只做 bootstrap**，内容由 routing 生成，不承载领域规则。
 3. **路由核心 · 唯一真源** —— `SKILL.md`(router, dual budget) + `routing.yaml`(唯一真源)。薄壳 bootstrap、Common Tasks、Always Read **都是它生成的投影**。
 4. **知识层 · 按 abstraction 两层** —— 骨架 `skill_root`（architecture/rules/workflows，稳定）vs 肉 `code_root`（conventions/gotchas/references，随代码漂）。
-5. **执行 / 闭合** —— `workflows`（plan/fix/implement/…）+ `task-closure`（共享闭合闸门）+ blast-radius 桶 A/B/C。
+5. **Task Anchor / 执行 / 闭合** —— Simple 任务直接执行；其他任务建立 Goal + Done When，默认只做自然语言对齐、复杂或范围敏感任务才展示完整简报，Native Plan 可见时不在对话里重复步骤；每个主步骤前运行 Anchor Checkpoint，最后经 `task-closure` 和 blast-radius 桶 A/B/C 闭合；状态只在当前 Session，不创建计划文件。
 6. **维护 / 校验脊柱** —— `sync-routing / smoke-test / route-reachability / audit-orphans`，回灌 ③ 真源、分别保证结构、链接与任务激活真实可达（**激活 not 存储**）。
 7. **生命周期** —— 上游元仓 ↔ 下游 app，机制文件字节同步、骨架变更手工搬运。
 
@@ -43,8 +43,8 @@
 1. **① 入口引导** —— 会话纪律：同一会话后续任务只重匹配 route，仅在 route 变化/上下文压缩时重读；读薄壳 → 指向 SKILL.md + bootstrap。
 2. **② 路由匹配** —— 扫 SKILL.md 命中 skill（前端/后端/双端/other）。
 3. **③ 分层阅读** —— 读 Always Read + routing.yaml，匹配 route（无匹配→other），**只读 required_reads**（token 收口），按骨架/肉取用。
-4. **④⑤ 执行 + 跨端** —— 单 Skill 直接完成；跨端走**契约优先**：后端产契约 → 前端产约束 → 对齐 → 先稳后端契约再接前端联调。
-5. **⑥ 闭合触发 + 桶分级** —— `Trigger Policy` 放行纯读任务；改动任务按**文件路径**落入 A/B/C 桶：
+4. **④⑤ 锚定 + 执行 + 跨端** —— Simple 直接执行；Managed 建立 Task Anchor 并按任务风险决定自然语言对齐或完整简报，Native Plan 把 Workflow 实例化为当前步骤且不在对话中重复；每个主步骤前用 Anchor Checkpoint 重读 Goal / 剩余证据 / 步骤检查 / 相关边界；单 Skill 走领域 Workflow，跨端仍走**契约优先**。
+5. **⑥ Closure Entry Gate + 桶分级** —— Goal / Done When / Plan 步骤未验证则返回执行；入口通过后，`Trigger Policy` 放行纯读任务，改动按**文件路径**落入 A/B/C 桶：
    - **A**（SKILL.md/薄壳/routing.yaml/scripts/*.tpl）→ 完整闭合：AAR + smoke-test + 路径完整性；
    - **B**（模板 rules/workflows、SKILL 链接的 references、full-migration）→ 轻量 AAR，不跑 smoke-test；
    - **C**（README/examples/docs/UPSTREAM/*.example/未链接 references）→ 跳过闭合。

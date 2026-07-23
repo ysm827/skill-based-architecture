@@ -98,8 +98,9 @@ Each workflow includes:
 
 Avoid one giant `workflow.md` — specialize by task type.
 
-**Required meta-workflow** (create for every project):
+**Required meta-workflows** (create for every project):
 
+- `task-execution.md` — Task Execution Protocol: Simple tasks stay direct; other tasks establish a Task Anchor, present only useful alignment, and use the harness-native Plan without duplicating it in chat or replacing Domain Workflows (canonical workflow at [`templates/skill/workflows/task-execution.md`](../templates/skill/workflows/task-execution.md))
 - `task-closure.md` — cross-cutting closure gate: Task Closure Protocol + after-action review + rationalizations (canonical workflow at [`templates/skill/workflows/task-closure.md`](../templates/skill/workflows/task-closure.md))
 - `update-rules.md` — rule sync + recording mechanics + learn-from-mistakes + deprecation (canonical workflow at [`templates/skill/workflows/update-rules.md`](../templates/skill/workflows/update-rules.md))
 

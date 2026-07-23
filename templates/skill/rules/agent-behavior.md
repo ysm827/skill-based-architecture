@@ -10,18 +10,18 @@ Universal defaults for any agent working inside this skill. Project-specific ove
 
 ✓ Check: can you name the assumption, evidence, and rejected alternative behind the chosen direction?
 
-## 2. Simplicity First
+## 2. Semantic Completeness Before Minimality
 
-- Implement only what the request needs; no speculative abstraction, configurability, or fallback.
-- Prefer the existing project pattern and standard library when they fit.
-- If a much smaller solution preserves the same behavior, use it.
+- Default to **Product Development**: establish the semantic/business invariant, state ownership/provenance, producer-to-consumer call chain, and every affected full/incremental/read/write path before choosing repair depth.
+- Fix at the boundary that owns the invariant, even when correctness requires coordinated changes across layers. Dependency count is risk evidence, not a veto; prefer the smallest option only among semantically complete solutions.
+- Enter **Operational Stabilization** only when the task explicitly prioritizes a production incident, hotfix, availability, stop-the-bleeding containment, or frozen scope. A minimal reversible containment must report the structural repair still unresolved.
 
-✓ Check: would removing any new layer or option leave the requested behavior intact? If yes, remove it.
+✓ Check: is the chosen boundary complete across ownership and all affected paths, or did implementation cost silently redefine correctness?
 
 ## 3. Surgical Changes
 
 - Touch only task-owned files and preserve unrelated local changes.
-- Match existing style; do not rename, reformat, or clean adjacent code unless required.
+- After semantic completeness is established, match existing style and avoid unrelated renaming, reformatting, or cleanup.
 - Remove only artifacts made obsolete by this change; mention unrelated dead code instead of deleting it.
 
 ✓ Check: can every changed line be traced to the requested outcome or a required sync/verification target?
@@ -38,10 +38,13 @@ Universal defaults for any agent working inside this skill. Project-specific ove
 ## 5. Goal-Driven Execution
 
 - Convert the request into one observable goal, explicit boundaries/non-goals, and acceptance evidence before editing; re-anchor only when discovery changes the frame.
-- For multi-step work, give each step a concrete check. Run scoped, reversible work end-to-end; pause only at a blocking choice, authorization boundary, or shared/irreversible action.
+- Before verification, bind each material risk to the cheapest fitted evidence that can falsify it and to an explicit stop/escalation condition. Stop when that contract is satisfied; do not use test count as a proxy for evidence quality.
+- One clear action with one direct check proceeds without planning ceremony. Otherwise follow [`task-execution.md`](../workflows/task-execution.md): establish the Task Anchor, present only useful alignment, use the harness's native Plan without duplicating visible steps in chat, and verify each step before advancing.
+- Before every main Plan step, run its compact Anchor Checkpoint; repeat after user correction, failed/surprising evidence, interruption, or Subagent return. This is Session recitation, not file persistence or per-tool narration.
+- Run scoped, reversible work end-to-end; pause only at a blocking choice, authorization boundary, shared/irreversible action, or scope expansion.
 - Treat rankings and process metrics as diagnostic signals, not objectives; question opaque rubrics or task mix, and do not suppress necessary exploration or evidence to improve a score. After three failed approaches, stop and report the attempts, evidence, and likely false premise before trying again.
 
-✓ Check: can you name the goal, non-goals, acceptance evidence, and next real approval boundary; did discovery change the frame, or did execution merely drift?
+✓ Check: immediately before the current step, can you name the Goal, remaining Done When evidence, step check, and relevant Boundary; did the Plan change when discovery changed the frame?
 
 ## 6. Delegate Only for Net Benefit
 

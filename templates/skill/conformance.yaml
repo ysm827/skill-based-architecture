@@ -4,6 +4,38 @@
 # their own checks.
 
 required_sections:
+  - file: workflows/task-execution.md
+    must_contain:
+      - "## Task Classifier"
+      - "## Task Anchor"
+      - "## Workflow Boundary"
+      - "## Recitation Loop"
+      - "## Execution Loop"
+      - "## New Message Gate"
+      - "## Exit To Closure"
+      - "Simple tasks skip this protocol"
+      - "After any needed alignment, proceed without waiting unless"
+      - "harness's native Plan/Task surface"
+      - "runtime state, not a fixed chat template"
+      - "natural-language alignment"
+      - "do not repeat its steps in chat"
+      - "## Presentation Gate"
+      - "Evaluate **Structured Brief first**"
+      - "Compact Alignment is allowed only when all Structured conditions are false"
+      - "first user-facing task-start message MUST begin with separate Goal"
+      - "Steps must be numbered"
+      - "do not collapse the brief into prose"
+      - "Before each main Plan step"
+      - "Never silently overwrite a load-bearing conclusion"
+      - "business owner's confirmation"
+      - "bind the material risk, fitted evidence, and stop/escalation condition"
+      - "do not narrate it before every tool call"
+      - "does not create durable planning files or recover task state across Sessions"
+    must_not_contain:
+      - "task_plan.md"
+      - "cross-tool state sync"
+      - "Plan: <concise task-specific steps"
+
   - file: workflows/plan-feature.md
     must_contain:
       - "## Complexity Gate"
@@ -11,6 +43,10 @@ required_sections:
       - "## Business-Semantics Gate"
       - "## Complex Plan"
       - "[workflow-state:planning]"
+      - "it is not the runtime Native Plan"
+      - "pass its chosen outcome, acceptance criteria, boundaries, and task breakdown"
+      - "If new evidence overturns a load-bearing conclusion"
+      - "legacy source, active destination, owner, activation path, and validation"
     must_not_contain:
       - "Pervasive reverse-question — default habit"
       - "one per lens"
@@ -25,9 +61,15 @@ required_sections:
   - file: workflows/task-closure.md
     must_contain:
       - "## Task Closure Protocol"
+      - "### Entry Gate"
+      - "return to [`task-execution.md`](task-execution.md)"
+      - "final Anchor Checkpoint"
       - "### Rationalizations to Reject"
       - "### Red Flags"
       - "## After-Action Review"
+      - "Test count is not evidence quality"
+      - "durable knowledge migrated/deleted/superseded"
+      - "rather than creating a mandatory ledger"
 
   - file: workflows/update-rules.md
     must_contain:
@@ -36,6 +78,28 @@ required_sections:
       - "### Reconciliation Gate"
       - "### Activation Check"
       - "### Generalization Rule"
+      - "do not create a fixed ledger solely to satisfy the gate"
+
+  - file: scripts/sync-routing.sh
+    must_contain:
+      - "domain_overlays"
+      - "domain overlay must inherit the task workflow"
+      - "owner_roots"
+      - "owner:<owner-id>:<path>"
+      - "--workspace-root"
+      - "task_route_id"
+      - "cross-owner target verification remains open"
+    must_not_contain:
+      - "allowed_apps"
+
+  - file: scripts/audit-orphans.sh
+    must_contain:
+      - "-type f -name '*.md'"
+
+  - file: scripts/route-reachability.sh
+    must_contain:
+      - "references/business"
+      - "-type f -name '*.md'"
 
   - file: workflows/maintain-docs.md
     must_contain:
@@ -46,6 +110,10 @@ required_sections:
     must_contain:
       - "## Mandatory Pre-Step"
       - "Design-or-defect gate"
+      - "Repair-depth gate"
+      - "invariant-owning boundary"
+      - "smallest semantically complete repair"
+      - "full/incremental/read/write path"
       - "Task Closure Protocol"
     must_not_contain:
       - "Pervasive reverse-question — default habit"
@@ -53,8 +121,19 @@ required_sections:
 
   - file: rules/agent-behavior.md
     must_contain:
+      - "## 2. Semantic Completeness Before Minimality"
+      - "Default to **Product Development**"
+      - "state ownership/provenance"
+      - "Dependency count is risk evidence, not a veto"
+      - "Enter **Operational Stabilization** only when"
       - "## 4. Minimal Context, Sufficient Evidence"
       - "explicit boundaries/non-goals"
+      - "One clear action with one direct check proceeds without planning ceremony"
+      - "harness's native Plan"
+      - "present only useful alignment"
+      - "without duplicating visible steps in chat"
+      - "Before every main Plan step"
+      - "do not use test count as a proxy for evidence quality"
       - "Run scoped, reversible work end-to-end"
       - "diagnostic signals, not objectives"
       - "## 6. Delegate Only for Net Benefit"
@@ -74,6 +153,7 @@ required_sections:
       - "## Mode Selection"
       - "## Mode 2 Entry"
       - "## Harness Compatibility"
+      - "Worker-local status never advances the Native Plan"
     must_not_contain:
       - "Iron Law (violation = task failure"
       - "must directly call `spawn_agent`"
@@ -82,7 +162,21 @@ required_sections:
     must_contain:
       - "## 1. Contract"
       - "## 3. Main-Agent Review"
+      - "Task Ref"
+      - "Context Read"
+      - "provenance index, not proof"
       - "does **not** run project-wide Task Closure"
+
+  - file: protocol-blocks/subagent-contract.md
+    must_contain:
+      - "## Task Ref"
+      - "## Role"
+      - "## Evidence"
+      - "Context Read"
+      - "Files Changed"
+      - "Checks Run"
+      - "Remaining Risks"
+      - "provenance index, not proof"
 
   - file: workflows/receiving-review.md
     must_contain:
@@ -94,8 +188,16 @@ required_sections:
       - "## Hard Rules"
       - "## Procedure"
       - "conformance.yaml"
+      - "Vendor: only paths explicitly listed"
+      - "Project-owned: every non-vendor source file"
+      - "Generated: Always Read, Common Tasks"
+      - "Runtime-data: hook state, caches, secrets"
 
   - file: workflows/change-managed.md
+    must_contain:
+      - "Map semantic fan-out"
+      - "full/incremental/read/write path"
+      - "smallest semantically complete change"
     must_not_contain:
       - "Pervasive reverse-question — default habit"
       - "directly `spawn_agent`"
@@ -107,3 +209,4 @@ required_sections:
 
 required_files:
   - path: routing.yaml
+  - path: workflows/task-execution.md

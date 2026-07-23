@@ -2,7 +2,7 @@
 
 > Extends [`../workflows/subagent-orchestration.md`](../workflows/subagent-orchestration.md). Its two-stage review checks **worker compliance** — did the worker follow its contract (Stage A) and meet quality bars (Stage B). These two patterns cover what compliance review cannot: **is the worker's conclusion actually correct**, and **did the sweep find everything**. Reach for them only when a subagent's *output is a judgment or a discovery*, not a mechanical edit a test can settle.
 
-Harness-agnostic. "Dispatch a verifier" = your harness's subagent primitive (Claude Code `Task`; degraded mode = reset mental context, re-read only the contract — see `../workflows/subagent-orchestration.md` § Degraded Mode). Each verifier / finder is an ordinary Subagent Contract (Goal / Inputs / Outputs / Forbidden / Acceptance), dispatched non-blocking per the Parallelism Premise.
+Harness-agnostic. "Dispatch a verifier" = your harness's subagent primitive (Claude Code `Task`; degraded mode = reset mental context, re-read only the contract — see `../workflows/subagent-orchestration.md` § Degraded Mode). Each verifier / finder uses the ordinary Subagent Contract (Task Ref / Role / Goal / Inputs / Outputs / Forbidden / Acceptance, then Evidence + Return Status), dispatched non-blocking per the Parallelism Premise.
 
 ## When NOT to reach for these
 

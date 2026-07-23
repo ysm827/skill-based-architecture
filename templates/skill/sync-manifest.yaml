@@ -1,9 +1,13 @@
-# Vendor-class files — byte-identical copies of upstream mechanism files.
-# scripts/sync-vendor.sh syncs these mechanically during update-upstream:
+# Owner classes: vendor entries below are byte-identical upstream mechanisms;
+# project-owned paths are everything else and are merged, never overwritten;
+# generated routing/shell blocks come only from sync-routing.sh; runtime data,
+# secrets, caches, and local instances stay gitignored and never enter sync.
+# scripts/sync-vendor.sh syncs only this vendor block during update-upstream:
 # base = the upstream version at your recorded .upstream-sync synced_sha;
 # a local file matching base is provably unedited and safe to overwrite,
 # a local file differing from base is reported, never overwritten.
-# Project-owned files (rules/, gotchas, routing.yaml, SKILL.md…) NEVER go here.
+# Allowed vendor owners are this manifest, protocol-blocks/**, and scripts/**;
+# all other paths are rejected even if someone adds them to this block.
 # This manifest is itself vendor-class: upstream's copy wins on sync.
 vendor:
   - sync-manifest.yaml

@@ -11,6 +11,7 @@
 - `workflows/add-controller.md` — new Controller + route + template
 - `workflows/add-entity-and-mapper.md` — new Entity + Mapper + Service method
 - `workflows/fix-bug.md` — debug flow
+- `workflows/task-execution.md` — cross-cutting Task Anchor + harness-native Plan protocol; Simple tasks skip it
 - `workflows/task-closure.md` — cross-cutting closure gate + after-action review + rationalizations
 - `workflows/update-rules.md` — rule sync + recording mechanics + learn-from-mistakes
 - `workflows/maintain-docs.md` — file health check, split, merge
@@ -21,7 +22,7 @@
 ### General-purpose
 
 - `rules/project-rules.md`, `rules/coding-standards.md`
-- `workflows/fix-bug.md`, `workflows/update-rules.md`, `workflows/maintain-docs.md`
+- `workflows/task-execution.md`, `workflows/fix-bug.md`, `workflows/update-rules.md`, `workflows/maintain-docs.md`
 - `references/architecture.md`, `references/source-index.md`
 
 ### Frontend-heavy

@@ -55,13 +55,16 @@ You dispatch a subagent whose whole job is to run the other skill, then return a
 ## Step 3 — Research the library
 
 Dispatch a subagent with contract:
+  Task Ref: plan step 3 / library research
+  Role: explore
   Goal: answer X using skills/web-research
   Inputs: the target library name
   Outputs: a 10-line summary returned to this workflow
   Forbidden: writing any files in the main repo
   Acceptance: summary contains version, license, maintenance status
+  Return: Evidence plus one allowed Return Status
 
-(See `protocol-blocks/subagent-contract.md` for the 5-field form.)
+(See `protocol-blocks/subagent-contract.md` for the dispatch/return envelope.)
 ```
 
 **Key property:** the subagent's context is throwaway. Only the structured result comes back.

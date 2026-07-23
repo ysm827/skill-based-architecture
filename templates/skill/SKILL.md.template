@@ -33,7 +33,7 @@ These files apply to every task. Read them first:
 
 - **Re-match the route every task** (scan Common Tasks / `routing.yaml`). Never assume the new task uses the last route.
 - **Re-read the route's files only when the route changed, or context was compacted** (a fresh SKILL.md injection from your SessionStart hook is the signal context was dropped). Otherwise the files you read last task are still in context — re-reading them every task is wasted work and the main per-task tax this skill exists to avoid.
-- **Use minimal sufficient context** — start with Always Read + route `required_reads` + workflow. Expand one target at a time only on concrete ambiguity/risk signals from `rules/agent-behavior.md` § 4.
+- **Use minimal sufficient context** — start with Always Read + route `required_reads` + workflow. Expand only on signals from `rules/agent-behavior.md` § 4; tasks beyond one clear action/check then follow `workflows/task-execution.md`, while Simple tasks skip it.
 - **If you cannot tell whether context was compacted, re-read** — partial memory is worse than no memory.
 - Before final validation/commit after a long or interrupted task, run `protocol-blocks/reboot-check.md`: restate the original user constraints and chosen route; if you cannot, re-read the request, the route's files, and the workflow before proceeding.
 

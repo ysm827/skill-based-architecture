@@ -30,6 +30,8 @@ For every new task:
 4. Follow that route's `workflow`.
 ```
 
+When a project has proven domain-specific context that must combine with several task workflows, `sync-routing.sh` conditionally expands this generated block from `domain_overlays`. The default scaffold exposes no overlay concept. In an overlay-enabled project, the generated instructions match one task route plus zero or more overlays, preserve current-Session route/read provenance, and keep the task workflow authoritative. See [`business-global-model.md`](business-global-model.md#orthogonal-task-and-domain-routing).
+
 **Why a bootstrap?** In long conversations, Cursor summarizes earlier context. Instructions like "go read `skills/<name>/SKILL.md`" get truncated. The bootstrap keeps the lookup rule in every shell while the route data stays in one YAML manifest.
 
 ## Common Thin Shell Body

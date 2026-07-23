@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="680" height="906" viewBox="0 0 680 906" role="img">
 <title>Skill-Based Architecture 全局架构全景</title>
-<desc>七层结构：触发活化、入口薄壳、路由核心唯一真源、知识层骨架/肉、执行与闭合、维护校验脊柱、上下游生命周期。</desc>
+<desc>七层结构：触发活化、入口薄壳、路由核心唯一真源、知识层骨架/肉、Task Anchor 与 Native Plan 执行闭合、维护校验脊柱、上下游生命周期。</desc>
 <style>
 svg{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",Roboto,sans-serif}
 .t{font-size:14px;fill:#1c1c1a}
@@ -56,8 +56,8 @@ svg{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Micro
 <text class="ts" x="352" y="520" text-anchor="start" dominant-baseline="central">route.workflow</text>
 
 <rect x="40" y="534" width="600" height="92" rx="12" fill="none" stroke="#B4B2A9" stroke-width="0.8" stroke-dasharray="4 3"/>
-<text class="th" x="56" y="554" text-anchor="start" dominant-baseline="central">⑤ 执行 / 闭合</text>
-<g class="c-purple"><rect x="56" y="570" width="270" height="44" rx="8" stroke-width="0.5"/><text class="th" x="191" y="592" text-anchor="middle" dominant-baseline="central">workflows（plan/fix/implement/…）</text></g>
+<text class="th" x="56" y="554" text-anchor="start" dominant-baseline="central">⑤ Task Anchor / 执行 / 闭合</text>
+<g class="c-purple"><rect x="56" y="570" width="270" height="44" rx="8" stroke-width="0.5"/><text class="th" x="191" y="584" text-anchor="middle" dominant-baseline="central">Task Anchor · Native Plan</text><text class="ts" x="191" y="602" text-anchor="middle" dominant-baseline="central">按需展示 · Recitation</text></g>
 <g class="c-teal"><rect x="336" y="570" width="180" height="44" rx="8" stroke-width="0.5"/><text class="th" x="426" y="592" text-anchor="middle" dominant-baseline="central">task-closure · 共享闸门</text></g>
 <g class="c-amber"><rect x="526" y="570" width="98" height="44" rx="8" stroke-width="0.5"/><text class="th" x="575" y="592" text-anchor="middle" dominant-baseline="central">桶 A/B/C</text></g>
 <line x1="340" y1="626" x2="340" y2="646" class="arr" marker-end="url(#arrow)"/>
@@ -68,7 +68,7 @@ svg{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Micro
 <g class="c-blue"><rect x="168" y="686" width="108" height="44" rx="8" stroke-width="0.5"/><text class="ts" x="222" y="708" text-anchor="middle" dominant-baseline="central">smoke-test</text></g>
 <g class="c-blue"><rect x="280" y="686" width="108" height="44" rx="8" stroke-width="0.5"/><text class="ts" x="334" y="708" text-anchor="middle" dominant-baseline="central">reachability</text></g>
 <g class="c-blue"><rect x="392" y="686" width="108" height="44" rx="8" stroke-width="0.5"/><text class="ts" x="446" y="708" text-anchor="middle" dominant-baseline="central">audit-orphans</text></g>
-<g class="c-blue"><rect x="504" y="686" width="120" height="44" rx="8" stroke-width="0.5"/><text class="ts" x="564" y="708" text-anchor="middle" dominant-baseline="central">cross-refs</text></g>
+<g class="c-blue"><rect x="504" y="686" width="120" height="44" rx="8" stroke-width="0.5"/><text class="ts" x="564" y="708" text-anchor="middle" dominant-baseline="central">route-health</text></g>
 <line x1="340" y1="742" x2="340" y2="762" class="arr" marker-end="url(#arrow)"/>
 
 <rect x="40" y="766" width="600" height="100" rx="12" fill="none" stroke="#B4B2A9" stroke-width="0.8" stroke-dasharray="4 3"/>

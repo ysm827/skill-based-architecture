@@ -6,14 +6,17 @@ Read this only after [`subagent-driven.md`](subagent-driven.md) admits Mode 2. T
 
 Write the full task list before dispatch. Every worker gets:
 
-1. **Goal** — one outcome-focused sentence.
-2. **Inputs** — exact allowed files/data/artifacts.
-3. **Outputs** — exact artifacts or files to return/change.
-4. **Forbidden Zones** — paths and side effects it must not touch.
-5. **Acceptance Criteria** — literal checks the main agent can rerun.
-6. **Return Status** — exactly `DONE`, `DONE_WITH_CONCERNS`, `NEEDS_CONTEXT`, or `BLOCKED`.
+1. **Task Ref** — the owning Native Plan step, issue, or current-task identifier.
+2. **Role** — exactly `explore`, `implement`, `review`, or `verify`; this is a task role, not a harness agent type.
+3. **Goal** — one outcome-focused sentence.
+4. **Inputs** — exact allowed files/data/artifacts.
+5. **Outputs** — exact artifacts or files to return/change.
+6. **Forbidden Zones** — paths and side effects it must not touch.
+7. **Acceptance Criteria** — literal checks the main agent can rerun.
 
-Reject contracts whose acceptance cannot be checked. Reuse an existing Plan breakdown instead of re-deriving it.
+Every return adds **Evidence** (`Context Read`, `Files Changed`, `Checks Run`, `Remaining Risks`) and exactly one **Return Status**: `DONE`, `DONE_WITH_CONCERNS`, `NEEDS_CONTEXT`, or `BLOCKED`.
+
+Reject contracts whose acceptance cannot be checked. Reuse an existing design Plan breakdown or Native Plan step instead of re-deriving it; worker status remains local to that contract.
 
 ## 2. Dispatch
 
@@ -27,9 +30,10 @@ Run both stages for every return:
 
 **Stage A — contract compliance**
 
-- outputs exist and Forbidden Zones are untouched;
+- Task Ref and Role still match the owning work;
+- `Context Read` stays within Inputs; main-agent `git diff`/path inspection, not `Files Changed`, proves Outputs and Forbidden Zones;
 - literal acceptance checks pass when rerun;
-- no drive-by change escaped the contract.
+- no drive-by change escaped the contract; worker Evidence is a provenance index, not proof.
 
 **Stage B — quality/integration**
 
@@ -41,13 +45,13 @@ A failed stage triggers a fresh Net Benefit decision: correct inline when the re
 
 ## 4. Route the Return
 
-- `DONE` → Stage A + B, then merge if both pass.
+- `DONE` → Stage A + B, then merge if both pass; only the main agent may complete the owning Native Plan step.
 - `DONE_WITH_CONCERNS` → inspect concern, then Stage A + B.
 - `NEEDS_CONTEXT` → widen Inputs only if the work remains admitted.
 - `BLOCKED` → resolve or surface the real obstruction.
-- Missing status → treat as `NEEDS_CONTEXT`.
+- Missing Evidence or status → treat as `NEEDS_CONTEXT`.
 
-After all accepted results are integrated, the **main agent** runs Task Closure once for the complete task and decides whether any reported candidate lesson passes recording gates.
+After all accepted results are integrated and their owning Native Plan steps pass the main agent's checks, the **main agent** runs Task Closure once for the complete task and decides whether any reported candidate lesson passes recording gates.
 
 ## Degraded Mode
 

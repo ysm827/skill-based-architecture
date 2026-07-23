@@ -4,6 +4,12 @@ This is the completion-time gate for behavior, rule, routing, script, and struct
 
 ## Task Closure Protocol
 
+### Entry Gate
+
+Closure starts only after execution is complete. For a Simple task, the direct check and goal evidence must exist. For a Managed or Design-derived task, first run the final Anchor Checkpoint; the Task Anchor's Goal and Done When must be satisfied, every admitted Native Plan step must have passed its check, material Boundaries must remain intact, and no stale Plan branch may remain.
+
+If any condition is missing, return to [`task-execution.md`](task-execution.md); do not use Closure to finish execution work. A Plan status or worker claim is not evidence by itself.
+
 ### Trigger Policy
 
 | Task | Required closure |
@@ -19,16 +25,18 @@ This is the completion-time gate for behavior, rule, routing, script, and struct
 
 ### Closure Steps
 
-1. **Read back the contract** — restate the user outcome, matched route, acceptance evidence, and forbidden shortcuts. After a long/interrupted task, use `protocol-blocks/reboot-check.md`.
+1. **Read back the contract** — restate the Task Anchor (or Simple-task outcome), matched route, Goal-level acceptance evidence, material Boundaries, and forbidden shortcuts. After a long/interrupted task, use `protocol-blocks/reboot-check.md`.
 2. **Verify with fresh, fitted evidence**:
+   - bind each material risk to the cheapest evidence that can falsify it and state the stop/escalation condition before running checks;
    - targeted command/test/typecheck first;
    - runtime/service/browser evidence only for wiring, config, permissions, serialization, data state, or UI behavior;
    - packaged/release/deploy evidence only when that chain changed or the user requires it.
-   A fresh command against a stale artifact is not fresh evidence.
+   Stop when the bound evidence proves the contract; escalate only when a check fails, the risk crosses another boundary, or a stated uncertainty remains. Test count is not evidence quality. A fresh command against a stale artifact is not fresh evidence.
 3. **Run the AAR below.** Any yes enters `update-rules.md`; all no stops recording.
 4. **Run conditional integrity work**:
    - routing/shell/generated-block or structure/path changes → follow `maintain-docs.md` Step 6 and the repository's sync/smoke commands;
    - rule/reference meaning changes → search workflows for repeated invariants and reconcile them in the same change;
+   - durable knowledge migrated/deleted/superseded → prove destination, owner, normal activation path, fitted validation, and intentionally unretained content before removing the legacy source; use the existing Plan/migration record rather than creating a mandatory ledger;
    - high-risk route, non-idempotent workflow, executable script contract, or external handoff → add/adjust a behavior contract only when structural checks cannot prove it.
 5. **Report honestly** — name verified evidence and any unverified risk; do not self-certify beyond the checks run.
 

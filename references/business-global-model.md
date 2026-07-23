@@ -11,6 +11,9 @@ Use this optional pattern for product/business projects where an Agent repeatedl
 - [Plan and bug-fix consumption](#plan-and-bug-fix-consumption)
 - [Semantic read-back](#semantic-read-back)
 - [Routing recipe](#routing-recipe)
+- [Orthogonal task and domain routing](#orthogonal-task-and-domain-routing)
+- [Cross-owner reads](#cross-owner-reads)
+- [Provenance and retirement](#provenance-and-retirement)
 
 ## What belongs here
 
@@ -141,3 +144,53 @@ required_reads:
 After a module genuinely splits, route directly to the smallest known leaf. Use a module `index.md` only when it actively selects the leaf from task signals; a passive file list is not activation.
 
 For explicit modeling requests, copy and adapt `workflows/profile-business-model.md.example`, rename it to a real workflow, and add a project-specific route. Do not add that route to non-business projects.
+
+## Orthogonal task and domain routing
+
+When the same domain knowledge must accompany different task workflows, do not duplicate one complete route per task/domain pair. Keep one task route to select the workflow and add `domain_overlays` only after real domain leaves exist. An overlay may append `required_reads`; it must not declare or replace a workflow.
+
+```yaml
+domain_overlays:
+  - id: billing
+    labels: { en: Billing domain, zh: 计费领域 }
+    required_reads: [references/business/billing.md]
+    trigger_examples: [账单, 计费规则, invoice policy]
+
+tasks:
+  - id: fix-bug
+    labels: { en: Fix bug, zh: 修复 bug }
+    workflow: workflows/fix-bug.md
+    trigger_examples: [接口报错, fix this bug]
+```
+
+For each task, match exactly one task route and zero or more domain overlays, then merge Always Read + task reads + overlay reads. Keep only current-Session provenance: `task_route_id`, `domain_overlay_ids`, and `merged_required_reads`. This is a review aid, not persistent task state. Do not pre-create overlays, domain files, or an index for domains that do not yet exist.
+
+## Cross-owner reads
+
+When a domain has one owner but another app must consume it, keep the business model at the owner and declare an owner root instead of copying the model. Cross-owner references use `owner:<owner-id>:<path>`:
+
+```yaml
+owner_roots:
+  billing-service: services/billing
+
+domain_overlays:
+  - id: billing
+    labels: { en: Billing domain, zh: 计费领域 }
+    required_reads:
+      - owner:billing-service:skills/billing/references/business/billing.md
+    trigger_examples: [账单, 计费规则, invoice policy]
+```
+
+Owner ids and roots are project declarations, never SBA hard-coded app names. Roots and target paths must be workspace-relative and may not traverse parents. Validate target existence from the real workspace root:
+
+```bash
+bash scripts/sync-routing.sh <skill-root> --check --workspace-root <workspace-root>
+```
+
+Without `--workspace-root`, the validator may prove syntax, declared ownership, and path safety only; it must report target existence as unverified rather than presenting a complete green result. The project assembler should supply this root so ordinary users do not configure it manually.
+
+## Provenance and retirement
+
+Requirement provenance is conditional, not a permanent double-maintenance protocol. When a requirement creates or changes durable business meaning, let the requirement name the active destination and let the active leaf retain the source requirement needed to reconstruct that decision. A migration dossier, when needed for many legacy sources, is a temporary reconciliation artifact and freezes after migration; ordinary future requirements do not keep updating it.
+
+Before deleting or superseding durable knowledge, prove destination, owner, normal activation path, fitted validation, and any intentionally unretained content. Keep that proof in the existing Plan or migration record; do not create a fixed ledger or extra file when the same contract already fits there.

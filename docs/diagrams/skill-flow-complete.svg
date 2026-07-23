@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="680" height="1420" viewBox="0 0 680 1420" role="img">
 <title>Skill-Based Architecture 完整流程</title>
-<desc>从用户提问到任务闭合的完整流程：入口引导、路由匹配、分层阅读、执行与跨端、闭合触发与桶分级、AAR 沉淀、路由同步与结构校验。</desc>
+<desc>从用户提问到任务闭合的完整流程：入口引导、路由匹配、分层阅读、Task Anchor 与 Native Plan、Domain Workflow、Closure Entry Gate、AAR 沉淀、路由同步与结构校验。</desc>
 <style>
 svg{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",Roboto,sans-serif}
 .t{font-size:14px;fill:#1c1c1a}
@@ -27,7 +27,7 @@ svg{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Micro
 <g class="c-gray"><rect x="40" y="51" width="94" height="30" rx="6" stroke-width="0.5"/><text class="ts" x="87" y="66" text-anchor="middle" dominant-baseline="central">① 入口</text></g>
 <g class="c-gray"><rect x="40" y="249" width="94" height="30" rx="6" stroke-width="0.5"/><text class="ts" x="87" y="264" text-anchor="middle" dominant-baseline="central">② 路由</text></g>
 <g class="c-gray"><rect x="40" y="319" width="94" height="30" rx="6" stroke-width="0.5"/><text class="ts" x="87" y="334" text-anchor="middle" dominant-baseline="central">③ 阅读</text></g>
-<g class="c-gray"><rect x="40" y="459" width="94" height="30" rx="6" stroke-width="0.5"/><text class="ts" x="87" y="474" text-anchor="middle" dominant-baseline="central">④⑤ 执行</text></g>
+<g class="c-gray"><rect x="40" y="459" width="94" height="30" rx="6" stroke-width="0.5"/><text class="ts" x="87" y="474" text-anchor="middle" dominant-baseline="central">④⑤ 锚定/执行</text></g>
 <g class="c-gray"><rect x="40" y="723" width="94" height="30" rx="6" stroke-width="0.5"/><text class="ts" x="87" y="738" text-anchor="middle" dominant-baseline="central">⑥ 闭合</text></g>
 <g class="c-gray"><rect x="40" y="863" width="94" height="30" rx="6" stroke-width="0.5"/><text class="ts" x="87" y="878" text-anchor="middle" dominant-baseline="central">⑦ 沉淀</text></g>
 <g class="c-gray"><rect x="40" y="1197" width="94" height="30" rx="6" stroke-width="0.5"/><text class="ts" x="87" y="1212" text-anchor="middle" dominant-baseline="central">⑧ 校验</text></g>
@@ -53,29 +53,29 @@ svg{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Micro
 <g class="c-gray"><rect x="150" y="378" width="300" height="52" rx="8" stroke-width="0.5"/><text class="th" x="300" y="398" text-anchor="middle" dominant-baseline="central">只读 required_reads（按需）</text><text class="ts" x="300" y="416" text-anchor="middle" dominant-baseline="central">token 收口 → 按 骨架/肉 分层取用</text></g>
 <line x1="300" y1="433" x2="300" y2="445" class="arr" marker-end="url(#arrow)"/>
 
-<g class="c-gray"><rect x="150" y="448" width="300" height="52" rx="8" stroke-width="0.5"/><text class="th" x="300" y="468" text-anchor="middle" dominant-baseline="central">执行 route.workflow</text><text class="ts" x="300" y="486" text-anchor="middle" dominant-baseline="central">前端 UI/请求/状态 ┃ 后端 接口/服务/数据</text></g>
+<g class="c-purple"><rect x="150" y="448" width="300" height="52" rx="8" stroke-width="0.5"/><text class="th" x="300" y="468" text-anchor="middle" dominant-baseline="central">Task Anchor + Native Plan</text><text class="ts" x="300" y="486" text-anchor="middle" dominant-baseline="central">Simple 直接 · Managed 建立并按需展示</text></g>
 <line x1="300" y1="503" x2="300" y2="515" class="arr" marker-end="url(#arrow)"/>
 
 <g class="c-amber"><rect x="150" y="518" width="300" height="44" rx="8" stroke-width="0.5"/><text class="th" x="300" y="540" text-anchor="middle" dominant-baseline="central">是否跨端任务？</text></g>
 <line x1="450" y1="540" x2="470" y2="540" class="arr" marker-end="url(#arrow)"/>
 <text class="ts" x="452" y="530" text-anchor="start" dominant-baseline="central">否</text>
-<g class="c-gray"><rect x="470" y="518" width="170" height="44" rx="8" stroke-width="0.5"/><text class="th" x="555" y="540" text-anchor="middle" dominant-baseline="central">单 Skill 完成</text></g>
+<g class="c-gray"><rect x="470" y="518" width="170" height="44" rx="8" stroke-width="0.5"/><text class="th" x="555" y="540" text-anchor="middle" dominant-baseline="central">单 Skill Workflow</text></g>
 <path d="M555 562 L555 672 L452 672" class="arr" fill="none" marker-end="url(#arrow)"/>
 <line x1="300" y1="565" x2="300" y2="577" class="arr" marker-end="url(#arrow)"/>
 
 <g class="c-gray"><rect x="150" y="580" width="300" height="52" rx="8" stroke-width="0.5"/><text class="th" x="300" y="600" text-anchor="middle" dominant-baseline="central">跨端 · 契约优先</text><text class="ts" x="300" y="618" text-anchor="middle" dominant-baseline="central">后端契约 → 前端约束 → 对齐 → 联调</text></g>
 <line x1="300" y1="635" x2="300" y2="647" class="arr" marker-end="url(#arrow)"/>
 
-<g class="c-gray"><rect x="150" y="650" width="300" height="44" rx="8" stroke-width="0.5"/><text class="th" x="300" y="672" text-anchor="middle" dominant-baseline="central">任务主体完成</text></g>
+<g class="c-gray"><rect x="150" y="650" width="300" height="44" rx="8" stroke-width="0.5"/><text class="th" x="300" y="664" text-anchor="middle" dominant-baseline="central">Anchor Checkpoint → Plan 步骤</text><text class="ts" x="300" y="682" text-anchor="middle" dominant-baseline="central">重读 Goal / 证据 / 检查 / 边界</text></g>
 <line x1="300" y1="697" x2="300" y2="709" class="arr" marker-end="url(#arrow)"/>
 
-<g class="c-amber"><rect x="150" y="712" width="300" height="52" rx="8" stroke-width="0.5"/><text class="th" x="300" y="732" text-anchor="middle" dominant-baseline="central">Trigger Policy：改了代码/文档？</text><text class="ts" x="300" y="750" text-anchor="middle" dominant-baseline="central">纯 Q&amp;A / 只读 → 豁免</text></g>
+<g class="c-amber"><rect x="150" y="712" width="300" height="52" rx="8" stroke-width="0.5"/><text class="th" x="300" y="732" text-anchor="middle" dominant-baseline="central">Task Closure Entry Gate</text><text class="ts" x="300" y="750" text-anchor="middle" dominant-baseline="central">Goal / Done When / Plan 步骤均已验证？</text></g>
 <line x1="450" y1="738" x2="470" y2="738" class="arr" marker-end="url(#arrow)"/>
 <text class="ts" x="452" y="728" text-anchor="start" dominant-baseline="central">否</text>
-<g class="c-gray"><rect x="470" y="712" width="170" height="52" rx="8" stroke-width="0.5"/><text class="th" x="555" y="730" text-anchor="middle" dominant-baseline="central">豁免 → 结束</text><text class="ts" x="555" y="748" text-anchor="middle" dominant-baseline="central">纯 Q&amp;A / 只读</text></g>
+<g class="c-gray"><rect x="470" y="712" width="170" height="52" rx="8" stroke-width="0.5"/><text class="th" x="555" y="730" text-anchor="middle" dominant-baseline="central">返回执行 / Replan</text><text class="ts" x="555" y="748" text-anchor="middle" dominant-baseline="central">不能用 Closure 补步骤</text></g>
 <line x1="300" y1="767" x2="300" y2="779" class="arr" marker-end="url(#arrow)"/>
 
-<g class="c-amber"><rect x="150" y="782" width="300" height="52" rx="8" stroke-width="0.5"/><text class="th" x="300" y="802" text-anchor="middle" dominant-baseline="central">blast-radius 桶（只看路径）</text><text class="ts" x="300" y="820" text-anchor="middle" dominant-baseline="central">取最大桶 A&gt;B&gt;C · A 桶小改也全闭合</text></g>
+<g class="c-amber"><rect x="150" y="782" width="300" height="52" rx="8" stroke-width="0.5"/><text class="th" x="300" y="802" text-anchor="middle" dominant-baseline="central">Trigger Policy + blast-radius A/B/C</text><text class="ts" x="300" y="820" text-anchor="middle" dominant-baseline="central">纯读豁免 · 改动按路径取最大桶</text></g>
 <line x1="450" y1="808" x2="470" y2="808" class="arr" marker-end="url(#arrow)"/>
 <text class="ts" x="452" y="798" text-anchor="start" dominant-baseline="central">C</text>
 <g class="c-gray"><rect x="470" y="786" width="170" height="44" rx="8" stroke-width="0.5"/><text class="th" x="555" y="808" text-anchor="middle" dominant-baseline="central">C 桶 → 跳过 → 结束</text></g>

@@ -185,6 +185,192 @@ YAML
   rm -rf "$tmp"
 }
 
+check_vendor_sync_guards() (
+  set -euo pipefail
+  local tmp up skill outside script manifest sha output status
+  tmp="$(mktemp -d)"
+  trap 'rm -rf "$tmp"' EXIT
+  up="$tmp/upstream"; skill="$tmp/skill"; outside="$tmp/outside"
+  script="$ROOT/templates/skill/scripts/sync-vendor.sh"
+  manifest="$up/templates/skill/sync-manifest.yaml"
+
+  mkdir -p "$up/templates/skill/scripts" "$up/templates/skill/rules" "$skill" "$outside"
+  printf '# fixture\n' > "$up/templates/skill/scripts/payload.sh"
+  printf '# project-owned\n' > "$up/templates/skill/rules/project.md"
+  printf '# fixture skill\n' > "$skill/SKILL.md"
+  printf 'vendor:\n  - scripts/payload.sh\nproject_owned:\n  - rules/project.md\n' > "$manifest"
+  git -C "$up" init -q
+  git -C "$up" config user.email fixture@example.invalid
+  git -C "$up" config user.name Fixture
+  git -C "$up" add .
+  git -C "$up" commit -qm fixture
+  sha="$(git -C "$up" rev-parse HEAD)"
+  printf 'upstream: fixture\nsynced_sha: %s\nsynced_date: 2026-07-22\n' "$sha" > "$skill/.upstream-sync"
+
+  bash "$script" "$skill" --upstream "$up" --apply >/dev/null
+  [[ -f "$skill/scripts/payload.sh" ]] || { echo "vendor block entry was not copied" >&2; return 1; }
+  [[ ! -e "$skill/rules/project.md" ]] || { echo "parser consumed a non-vendor owner block" >&2; return 1; }
+
+  expect_vendor_reject() {
+    local label="$1"
+    if output="$(bash "$script" "$skill" --upstream "$up" --apply 2>&1)"; then
+      echo "vendor guard accepted $label" >&2
+      return 1
+    else
+      status=$?
+    fi
+    [[ $status -eq 2 && "$output" == *"FAIL:"* ]] || {
+      echo "vendor guard returned unexpected result for $label: status=$status" >&2
+      printf '%s\n' "$output" >&2
+      return 1
+    }
+  }
+
+  printf 'vendor:\n  - rules/project.md\n' > "$manifest"
+  expect_vendor_reject "project-owned path"
+  [[ ! -e "$skill/rules/project.md" ]] || { echo "project-owned path was written" >&2; return 1; }
+
+  printf 'vendor:\n  - /tmp/vendor-sync-absolute-escape\n' > "$manifest"
+  expect_vendor_reject "absolute path"
+
+  printf 'vendor:\n  - scripts/../escape.sh\n' > "$manifest"
+  expect_vendor_reject "traversal path"
+  [[ ! -e "$skill/escape.sh" ]] || { echo "traversal path escaped the owner directory" >&2; return 1; }
+
+  rm -rf "$skill/scripts"
+  ln -s "$outside" "$skill/scripts"
+  printf 'vendor:\n  - scripts/payload.sh\n' > "$manifest"
+  expect_vendor_reject "symlink target"
+  [[ ! -e "$outside/payload.sh" ]] || { echo "symlink target escaped the skill root" >&2; return 1; }
+)
+
+check_overlay_owner_contract() (
+  set -euo pipefail
+  local tmp root skill script output
+  tmp="$(mktemp -d)"
+  trap 'rm -rf "$tmp"' EXIT
+  root="$tmp/workspace"
+  skill="$root/skills/sample"
+  script="$ROOT/templates/skill/scripts/sync-routing.sh"
+  mkdir -p "$skill/rules" "$skill/workflows" "$skill/references/business" \
+    "$root/services/billing/skills/billing/references/business"
+  printf '# Base\n' > "$skill/rules/base.md"
+  printf '# Run\n' > "$skill/workflows/run.md"
+  printf '# Local billing consumer\n' > "$skill/references/business/billing-consumer.md"
+  printf '# Billing owner\n' > "$root/services/billing/skills/billing/references/business/billing.md"
+  cat > "$skill/SKILL.md" <<'MARKDOWN'
+---
+name: sample
+description: sample overlay fixture
+---
+# Sample
+<!-- ALWAYS_READ_START -->
+<!-- ALWAYS_READ_END -->
+<!-- ROUTING_SUMMARY_START -->
+<!-- ROUTING_SUMMARY_END -->
+MARKDOWN
+  cat > "$skill/routing.yaml" <<'YAML'
+owner_roots:
+  billing: services/billing
+always_read:
+  - rules/base.md
+domain_overlays:
+  - id: billing
+    labels: { en: Billing, zh: 计费 }
+    required_reads:
+      - references/business/billing-consumer.md
+      - owner:billing:skills/billing/references/business/billing.md
+    trigger_examples: [账单, billing policy]
+tasks:
+  - id: run
+    labels: { en: Run, zh: 执行 }
+    workflow: workflows/run.md
+    trigger_examples: [执行任务, run task]
+  - id: other
+    labels: { en: Other, zh: 其他 }
+    workflow: workflows/run.md
+    trigger_examples: [其他任务]
+YAML
+
+  (cd "$root" && bash "$script" "$skill" --workspace-root "$root") >/dev/null
+  grep -q 'Domain overlays are active' "$skill/SKILL.md"
+  grep -q 'task_route_id.*domain_overlay_ids.*merged_required_reads' "$skill/SKILL.md"
+  (cd "$root" && bash "$script" "$skill" --check --workspace-root "$root") >/dev/null
+  output="$(cd "$root" && bash "$script" "$skill" --check)"
+  [[ "$output" == *"cross-owner target verification remains open"* ]] || {
+    echo "owner check without workspace root did not report unverified target existence" >&2
+    return 1
+  }
+  output="$(bash "$ROOT/templates/skill/scripts/route-health.sh" "$skill")"
+  [[ "$output" == *"1 task routes + 1 domain overlays"* ]] || {
+    echo "route-health did not separate task routes from domain overlays" >&2
+    return 1
+  }
+
+  rm "$root/services/billing/skills/billing/references/business/billing.md"
+  if (cd "$root" && bash "$script" "$skill" --check --workspace-root "$root") >/dev/null 2>&1; then
+    echo "owner target validation accepted a missing cross-owner file" >&2
+    return 1
+  fi
+  printf '# Billing owner\n' > "$root/services/billing/skills/billing/references/business/billing.md"
+
+  perl -0pi -e 's#billing: services/billing#billing: ../billing#' "$skill/routing.yaml"
+  if (cd "$root" && bash "$script" "$skill" --check --workspace-root "$root") >/dev/null 2>&1; then
+    echo "owner root validation accepted parent traversal" >&2
+    return 1
+  fi
+  perl -0pi -e 's#billing: ../billing#billing: services/billing#' "$skill/routing.yaml"
+
+  perl -0pi -e 's#owner:billing:#owner:undeclared:#' "$skill/routing.yaml"
+  if (cd "$root" && bash "$script" "$skill" --check --workspace-root "$root") >/dev/null 2>&1; then
+    echo "owner reference validation accepted an undeclared owner" >&2
+    return 1
+  fi
+  perl -0pi -e 's#owner:undeclared:#owner:billing:#' "$skill/routing.yaml"
+
+  perl -0pi -e 's/(    labels: \{ en: Billing[^\n]*\n)/$1    workflow: workflows\/run.md\n/' "$skill/routing.yaml"
+  if (cd "$root" && bash "$script" "$skill" --check --workspace-root "$root") >/dev/null 2>&1; then
+    echo "domain overlay validation accepted a workflow override" >&2
+    return 1
+  fi
+)
+
+check_recursive_knowledge_integrity() (
+  set -euo pipefail
+  local tmp root routing
+  tmp="$(mktemp -d)"
+  trap 'rm -rf "$tmp"' EXIT
+  root="$tmp/skill"
+  routing="$root/routing.yaml"
+  mkdir -p "$root/rules" "$root/workflows" "$root/references/business/deep"
+  printf '# Base\n' > "$root/rules/base.md"
+  printf '# Run\n' > "$root/workflows/run.md"
+  printf '# Known\n' > "$root/references/business/known.md"
+  printf '# Nested orphan\n' > "$root/references/business/deep/orphan.md"
+  cat > "$routing" <<'YAML'
+always_read:
+  - rules/base.md
+tasks:
+  - id: run
+    required_reads:
+      - references/business/known.md
+    workflow: workflows/run.md
+YAML
+
+  if (cd "$root" && bash "$ROOT/templates/skill/scripts/audit-orphans.sh") >/dev/null 2>&1; then
+    echo "recursive orphan audit missed a nested business reference" >&2
+    return 1
+  fi
+  if (cd "$root" && bash "$ROOT/templates/skill/scripts/route-reachability.sh") >/dev/null 2>&1; then
+    echo "recursive route reachability missed an unactivated nested business reference" >&2
+    return 1
+  fi
+
+  printf '\nSee references/business/deep/orphan.md.\n' >> "$root/references/business/known.md"
+  (cd "$root" && bash "$ROOT/templates/skill/scripts/audit-orphans.sh") >/dev/null
+  (cd "$root" && bash "$ROOT/templates/skill/scripts/route-reachability.sh") >/dev/null
+)
+
 if [[ "$MODE" == "staged" ]]; then
   run "upstream change-note guard (staged)" bash scripts/check-upstream-changes.sh --base "$BASE" --staged
   run "whitespace diff check (staged)" git diff --cached --check
@@ -200,6 +386,9 @@ run "template SessionStart hook runtime contract" bash scripts/check-template-ho
 run "temporary downstream scaffold smoke test" check_downstream_scaffold
 run "single-root + two-root integrity contracts" check_two_root_integrity
 run "conformance option-like phrase contract" check_conformance_option_like_phrases
+run "vendor owner + path guards" check_vendor_sync_guards
+run "task route + domain overlay and cross-owner guards" check_overlay_owner_contract
+run "recursive business-reference integrity" check_recursive_knowledge_integrity
 run "self-hosting shells + activation check" bash scripts/check-self-shells.sh
 run "self-hosting scenario checks" bash scripts/check-self-scenarios.sh
 run "self-hosting phase 7 smoke test" bash templates/skill/scripts/smoke-test.sh skill-based-architecture --phase 7
