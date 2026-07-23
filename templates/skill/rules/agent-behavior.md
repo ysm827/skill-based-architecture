@@ -38,6 +38,7 @@ Universal defaults for any agent working inside this skill. Project-specific ove
 ## 5. Goal-Driven Execution
 
 - Convert the request into one observable goal, explicit boundaries/non-goals, and acceptance evidence before editing; re-anchor only when discovery changes the frame.
+- Before verification, bind each material risk to the cheapest fitted evidence that can falsify it and to an explicit stop/escalation condition. Stop when that contract is satisfied; do not use test count as a proxy for evidence quality.
 - One clear action with one direct check proceeds without planning ceremony. Otherwise follow [`task-execution.md`](../workflows/task-execution.md): establish the Task Anchor, present only useful alignment, use the harness's native Plan without duplicating visible steps in chat, and verify each step before advancing.
 - Before every main Plan step, run its compact Anchor Checkpoint; repeat after user correction, failed/surprising evidence, interruption, or Subagent return. This is Session recitation, not file persistence or per-tool narration.
 - Run scoped, reversible work end-to-end; pause only at a blocking choice, authorization boundary, shared/irreversible action, or scope expansion.

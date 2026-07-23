@@ -14,7 +14,7 @@ Do not classify by tool-call count or file count. Ask whether keeping an explici
 
 ## Task Anchor
 
-Before mutation on a Managed task, establish current-Session state with one observable Goal, Done When evidence, and only material Boundaries such as scope, non-goals, preservation requirements, permission, or approval limits. Derive a concise Native Plan from the matched Domain Workflow.
+Before mutation on a Managed task, establish current-Session state with one observable Goal, Done When evidence, and only material Boundaries such as scope, non-goals, preservation requirements, permission, or approval limits. Derive a concise Native Plan from the matched Domain Workflow. Before verification begins, bind the material risk, fitted evidence, and stop/escalation condition in the current Session; this is a decision aid, not another persistent artifact.
 
 The Task Anchor is runtime state, not a fixed chat template.
 

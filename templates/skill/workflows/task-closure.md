@@ -27,10 +27,11 @@ If any condition is missing, return to [`task-execution.md`](task-execution.md);
 
 1. **Read back the contract** — restate the Task Anchor (or Simple-task outcome), matched route, Goal-level acceptance evidence, material Boundaries, and forbidden shortcuts. After a long/interrupted task, use `protocol-blocks/reboot-check.md`.
 2. **Verify with fresh, fitted evidence**:
+   - bind each material risk to the cheapest evidence that can falsify it and state the stop/escalation condition before running checks;
    - targeted command/test/typecheck first;
    - runtime/service/browser evidence only for wiring, config, permissions, serialization, data state, or UI behavior;
    - packaged/release/deploy evidence only when that chain changed or the user requires it.
-   A fresh command against a stale artifact is not fresh evidence.
+   Stop when the bound evidence proves the contract; escalate only when a check fails, the risk crosses another boundary, or a stated uncertainty remains. Test count is not evidence quality. A fresh command against a stale artifact is not fresh evidence.
 3. **Run the AAR below.** Any yes enters `update-rules.md`; all no stops recording.
 4. **Run conditional integrity work**:
    - routing/shell/generated-block or structure/path changes → follow `maintain-docs.md` Step 6 and the repository's sync/smoke commands;

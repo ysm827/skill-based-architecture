@@ -28,6 +28,7 @@ required_sections:
       - "Before each main Plan step"
       - "Never silently overwrite a load-bearing conclusion"
       - "business owner's confirmation"
+      - "bind the material risk, fitted evidence, and stop/escalation condition"
       - "do not narrate it before every tool call"
       - "does not create durable planning files or recover task state across Sessions"
     must_not_contain:
@@ -66,6 +67,7 @@ required_sections:
       - "### Rationalizations to Reject"
       - "### Red Flags"
       - "## After-Action Review"
+      - "Test count is not evidence quality"
       - "durable knowledge migrated/deleted/superseded"
       - "rather than creating a mandatory ledger"
 
@@ -131,6 +133,7 @@ required_sections:
       - "present only useful alignment"
       - "without duplicating visible steps in chat"
       - "Before every main Plan step"
+      - "do not use test count as a proxy for evidence quality"
       - "Run scoped, reversible work end-to-end"
       - "diagnostic signals, not objectives"
       - "## 6. Delegate Only for Net Benefit"

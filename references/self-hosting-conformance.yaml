@@ -75,6 +75,8 @@ required_sections:
       - "规则必须能被正确激活；仅仅存进仓库不算产生价值"
       - "Agent 的结论必须可复核"
       - "语义完整性优先于代码改动最少，但验证成本必须与风险匹配"
+      - "验证前必须把风险、验证证据和停止条件绑定起来"
+      - "不得用测试数量代替证据质量"
       - "跨 harness 兼容应当优雅降级"
       - "SBA 负责吸收工程复杂度"
       - "不发展成 Agent 操作系统、任务数据库或项目管理平台"
@@ -118,6 +120,7 @@ required_sections:
       - "fidelity"
       - "reconciliation"
       - "cross-implementation stability"
+      - "bind material risk to fitted evidence and a stop/escalation condition"
 
   - file: references/business-global-model.md
     must_contain:
