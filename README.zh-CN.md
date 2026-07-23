@@ -173,6 +173,7 @@ Agent 会从 [`templates/`](templates/) 复制预制 scaffold 到 `skills/<name>
 | 文件 | 内容 |
 |---|---|
 | [SKILL.md](SKILL.md) | Skill 入口:何时使用、目标结构、核心原则 |
+| [docs/sba-bible.md](docs/sba-bible.md) | SBA 产品信念、发展方向与重大机制的决策门禁 |
 | [WORKFLOW.md](WORKFLOW.md) | 迁移指南:Quick Start scaffold、9-phase 流程、下游升级 |
 | [TEMPLATES-GUIDE.md](TEMPLATES-GUIDE.md) | 模板族注释指南 + Task Execution / Task Closure |
 | [docs/task-anchor-native-plan.md](docs/task-anchor-native-plan.md) | Task Anchor、原生 Plan、Workflow 与 Closure 的用户视角设计 |

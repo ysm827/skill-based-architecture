@@ -108,6 +108,25 @@ tasks:
       - 这个任务比较大
       - run several subtasks
 
+  - id: product-direction
+    labels:
+      en: Decide SBA product direction or absorb a major capability
+      zh: 判断 SBA 产品方向或重大能力吸收
+    required_reads:
+      - SKILL.md
+      - docs/sba-bible.md
+      - docs/plans/README.md
+    workflow: templates/skill/workflows/plan-feature.md
+    note: Self-hosting only. Read the Bible for product direction, external-project absorbs, and major mechanisms; ordinary coding and downstream tasks do not load it. The Bible defines direction, while code/tests define current truth
+    trigger_examples:
+      - SBA 应该往什么方向发展
+      - 讨论 SBA 的发展方向
+      - 吸收一个外部项目
+      - 增加一个重大机制
+      - 这项能力该不该吸收
+      - 看一下 SBA 的产品定位
+      - define SBA product direction
+
   - id: plan-feature
     labels:
       en: Draft or maintain a plan

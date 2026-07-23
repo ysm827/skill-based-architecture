@@ -74,8 +74,8 @@ When the candidate is **borrowed from an external skill, project, or benchmark**
 - **Language rule:** if users ask in Chinese or another non-English language, the quoted phrases must include that language. English-only examples are not neutral defaults for multilingual teams.
 - **Where it should go:** `<!-- FILL: -->` comment forcing the author to stop and think about what their users actually say.
 
-### Concrete subagent task specs (worked examples of Goal/Inputs/Outputs/Forbidden/Acceptance)
-- **Why rejected:** the `subagent-driven.md` workflow and `subagent-contract.md` block ship the *five-field protocol*; the actual contract content is entirely project-specific. Shipping a worked example tempts downstream agents to copy the example fields instead of writing their own, which defeats the point — the contract's value comes from being forced to articulate acceptance criteria for *this* task.
+### Concrete subagent task specs (worked dispatch/return envelopes)
+- **Why rejected:** the `subagent-driven.md` workflow and `subagent-contract.md` block ship the envelope shape; the actual Task Ref, Role, scope, and evidence are entirely task-specific. Shipping a worked example tempts downstream agents to copy its content instead of proving provenance and acceptance for *this* task.
 - **Where it should go:** each dispatch writes its own contract inline. The protocol-block is a fill-in form, not a sample.
 
 ### Subagent type registries / harness-specific dispatch code

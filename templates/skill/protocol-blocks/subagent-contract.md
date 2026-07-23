@@ -1,28 +1,33 @@
 # Subagent Contract
-Every subagent dispatched through [`subagent-auxiliary.md`](../workflows/subagent-auxiliary.md) or [`subagent-driven.md`](../workflows/subagent-driven.md) gets the five dispatch fields below plus one Return Status. Paste only the contract, not the main conversation history.
-From a plan? Lift Task Breakdown directly: Files+Produces → Outputs, Files+Consumes → Inputs, other tasks' files → Forbidden Zones, Acceptance → Acceptance Criteria.
+Every subagent dispatched through [`subagent-auxiliary.md`](../workflows/subagent-auxiliary.md) or [`subagent-driven.md`](../workflows/subagent-driven.md) gets this dispatch/return envelope. Paste only the contract, not the main conversation history.
+From a plan? Task heading → Task Ref; Files+Produces → Outputs; Files+Consumes → Inputs; other tasks' files → Forbidden Zones; Acceptance → Acceptance Criteria.
 
 ```markdown
+## Task Ref
+<!-- FIELD: Native Plan step, issue, or stable current-task identifier. -->
+## Role
+<!-- FIELD: explore | implement | review | verify. Task role, not a harness agent type. -->
 ## Goal
 <!-- FIELD: one sentence, outcome-focused. E.g., "Extract the retry logic in api/client.ts into a reusable helper with identical behavior." -->
-
 ## Inputs
 <!-- FIELD: exact file paths/artifacts the worker may read. Nothing implicit. -->
-
 ## Outputs
 <!-- FIELD: exact file paths the worker must create or modify. -->
-
 ## Forbidden Zones
 <!-- FIELD: files, directories, or side effects the worker must NOT touch. -->
-
 ## Acceptance Criteria
 <!-- FIELD: literal checks the main agent will run in Phase 3 Stage A. -->
-
+## Evidence
+- Context Read: <!-- exact paths/artifacts actually read -->
+- Files Changed: <!-- exact paths, or none -->
+- Checks Run: <!-- command/check plus observed result -->
+- Remaining Risks: <!-- scoped concerns, or none -->
 ## Return Status
 <!-- Worker ends with exactly ONE word: DONE | DONE_WITH_CONCERNS | NEEDS_CONTEXT | BLOCKED -->
 ```
 
-Rules: no field may be empty; Goal is outcome-focused; Forbidden Zones default to deny; Acceptance Criteria must be executable commands or `git` checks; if the contract is wrong, the main agent rewrites and re-dispatches; a bare "done" with no Return Status is invalid.
+Dispatch rules: no field may be empty; Forbidden Zones default to deny; Acceptance Criteria must be rerunnable commands or `git` checks; if the contract is wrong, the main agent rewrites and re-dispatches.
+Return rules: Evidence is a provenance index, not proof; the main agent checks the diff/paths and reruns Acceptance Criteria. Missing Evidence or a bare "done" is invalid.
 
 | Status | Meaning | Controller response |
 |---|---|---|

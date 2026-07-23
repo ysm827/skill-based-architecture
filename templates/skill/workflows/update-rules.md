@@ -133,7 +133,7 @@ When a task exposes a documentation failure, classify it before editing:
 3. obsolete premise → delete, or scope a temporary legacy remainder with reason/date;
 4. rule existed but was missed → improve its activation/prominence instead of duplicating it.
 
-When deleting/renaming a file, update routing and inbound links, run sync, and inspect orphan/reachability results. Use `maintain-docs.md` for full-file reorganization, split/merge, index, and independent-load-reason audits.
+When deleting/renaming a file, update routing and inbound links, run sync, and inspect orphan/reachability results. For durable knowledge, deletion additionally requires a reviewable destination, owner, normal activation path, fitted validation, and an explicit account of intentionally unretained content. Put this proof in the existing Plan or migration record; do not create a fixed ledger solely to satisfy the gate. Use `maintain-docs.md` for full-file reorganization, split/merge, index, and independent-load-reason audits.
 
 ## Completion Criteria
 

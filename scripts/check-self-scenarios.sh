@@ -115,10 +115,26 @@ check_scenario \
   "templates/skill/workflows/plan-feature.md" \
   "SKILL.md" \
   "docs/plans/README.md"
+
 assert_not_contains \
   "$(required_reads_block references/self-hosting-routing.yaml plan-feature)" \
   "templates/skill/workflows/update-rules.md" \
   "draft plan initial reads"
+
+check_scenario \
+  "SBA product direction" \
+  "references/self-hosting-routing.yaml" \
+  "SBA 应该往什么方向发展" \
+  "product-direction" \
+  "templates/skill/workflows/plan-feature.md" \
+  "SKILL.md" \
+  "docs/sba-bible.md" \
+  "docs/plans/README.md"
+
+product_direction="$(task_block references/self-hosting-routing.yaml product-direction)"
+assert_contains "$product_direction" "吸收一个外部项目" "SBA product direction external-project trigger"
+assert_contains "$product_direction" "增加一个重大机制" "SBA product direction major-mechanism trigger"
+assert_contains "$product_direction" "ordinary coding and downstream tasks do not load it" "SBA product direction scope boundary"
 
 check_scenario \
   "distill plan conclusions" \

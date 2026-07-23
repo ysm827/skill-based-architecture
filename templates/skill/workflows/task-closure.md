@@ -35,6 +35,7 @@ If any condition is missing, return to [`task-execution.md`](task-execution.md);
 4. **Run conditional integrity work**:
    - routing/shell/generated-block or structure/path changes → follow `maintain-docs.md` Step 6 and the repository's sync/smoke commands;
    - rule/reference meaning changes → search workflows for repeated invariants and reconcile them in the same change;
+   - durable knowledge migrated/deleted/superseded → prove destination, owner, normal activation path, fitted validation, and intentionally unretained content before removing the legacy source; use the existing Plan/migration record rather than creating a mandatory ledger;
    - high-risk route, non-idempotent workflow, executable script contract, or external handoff → add/adjust a behavior contract only when structural checks cannot prove it.
 5. **Report honestly** — name verified evidence and any unverified risk; do not self-certify beyond the checks run.
 

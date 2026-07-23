@@ -4,9 +4,11 @@ Look up what you need, not everything. Reference topics live under [`references/
 
 ## By task
 
+- **Deciding SBA product direction or whether to absorb a major capability** → read [`docs/sba-bible.md`](docs/sba-bible.md), then use [`templates/skill/workflows/plan-feature.md`](templates/skill/workflows/plan-feature.md); the Bible defines desired direction, while code/tests define current reality
 - **Laying out a new skill** → [`references/layout.md`](references/layout.md)
 - **Deciding when to grow / shrink / split a skill** → [`references/progressive-rigor.md`](references/progressive-rigor.md)
 - **Capturing stable macro business meaning without a heavy product-doc taxonomy** → [`references/business-global-model.md`](references/business-global-model.md)
+- **Combining a task workflow with routed domain context, validating cross-owner reads, or retiring legacy knowledge** → [`references/business-global-model.md`](references/business-global-model.md#orthogonal-task-and-domain-routing)
 - **Diagnosing instability — is it prompt, context, or harness?** → [`references/layout.md § Positioning in the Agent Stack`](references/layout.md#positioning-in-the-agent-stack)
 - **Writing or debugging thin shells** → [`references/thin-shells.md`](references/thin-shells.md) (common body, hooks, hygiene); [`references/per-tool-shells.md`](references/per-tool-shells.md) (per-tool templates + compatibility matrix)
 - **Updating downstream task routing** → edit `skills/<name>/routing.yaml`, then `bash skills/<name>/scripts/sync-routing.sh <name> --check`

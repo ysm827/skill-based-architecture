@@ -49,17 +49,20 @@ def parse_inline_list(v):
         return []
     return [clean(part.strip()) for part in inner.split(",") if part.strip()]
 
-# --- parse tasks: id + trigger_examples ---
-tasks, cur, sec, top = [], None, None, None
+# --- parse task routes and optional domain overlays independently ---
+tasks, overlays, cur, sec, top = [], [], None, None, None
 for raw in manifest.read_text().splitlines():
     s = raw.strip()
     if not s or s.startswith("#"):
         continue
     if s == "always_read:": top, cur, sec = "ar", None, None; continue
-    if s == "tasks:": top, sec = "t", None; continue
+    if s == "tasks:": top, cur, sec = "t", None, None; continue
+    if s == "domain_overlays:": top, cur, sec = "o", None, None; continue
     if raw.startswith("  - id:"):
+        if top not in {"t", "o"}:
+            continue
         cur = {"id": clean(raw.split(":", 1)[1]), "triggers": []}
-        tasks.append(cur); sec = None; continue
+        (tasks if top == "t" else overlays).append(cur); sec = None; continue
     if cur is None:
         continue
     if raw.startswith("    trigger_examples:"):
@@ -94,58 +97,59 @@ def tokens(t):
                 toks.add(run)
     return toks
 
-warns = []
-non_other = [t for t in tasks if t["id"] != "other"]
-
-# 1) no / weak triggers
-for t in non_other:
-    rt = real_triggers(t)
-    if len(rt) == 0:
-        warns.append(("no-triggers", f"{t['id']}: no real trigger_examples (only FILL/empty) — route can't be matched"))
-    elif len(rt) == 1:
-        warns.append(("weak-triggers", f"{t['id']}: only 1 trigger_example (>=2 recommended)"))
-
-# 2) language mismatch (vs the corpus's dominant script)
-cjk_routes = sum(1 for t in non_other if any(has_cjk(x) for x in real_triggers(t)))
-latin_routes = sum(1 for t in non_other if any(not has_cjk(x) for x in real_triggers(t)))
-if cjk_routes and latin_routes:
-    dominant_cjk = cjk_routes >= latin_routes
-    for t in non_other:
+def analyze(routes, group):
+    warns = []
+    active = [t for t in routes if t["id"] != "other"]
+    for t in active:
         rt = real_triggers(t)
-        if not rt:
-            continue
-        all_cjk = all(has_cjk(x) for x in rt)
-        all_latin = all(not has_cjk(x) for x in rt)
-        if dominant_cjk and all_latin:
-            warns.append(("language", f"{t['id']}: triggers are English-only but most routes use CJK — may miss the user's actual language"))
-        elif (not dominant_cjk) and all_cjk:
-            warns.append(("language", f"{t['id']}: triggers are CJK-only but most routes use English"))
+        if len(rt) == 0:
+            warns.append(("no-triggers", f"{group} {t['id']}: no real trigger_examples (only FILL/empty) — entry can't be matched"))
+        elif len(rt) == 1:
+            warns.append(("weak-triggers", f"{group} {t['id']}: only 1 trigger_example (>=2 recommended)"))
 
-# 3) trigger overlap (>=2 shared *discriminating* tokens => mis-route risk).
-#    Only tokens unique to a pair (document-frequency == 2) count; ubiquitous
-#    project/domain words (project name, core domain terms) have high df and are
-#    not discriminating, so they are ignored to avoid noise.
-tok = {t["id"]: tokens(t) for t in non_other}
-df = {}
-for toks in tok.values():
-    for w in toks:
-        df[w] = df.get(w, 0) + 1
-ids = [t["id"] for t in non_other]
-for i in range(len(ids)):
-    for j in range(i + 1, len(ids)):
-        shared = {w for w in (tok[ids[i]] & tok[ids[j]]) if df.get(w, 0) == 2}
-        if len(shared) >= 2:
-            warns.append(("overlap", f"{ids[i]} ~ {ids[j]}: share {sorted(shared)} — mis-route risk"))
+    cjk_routes = sum(1 for t in active if any(has_cjk(x) for x in real_triggers(t)))
+    latin_routes = sum(1 for t in active if any(not has_cjk(x) for x in real_triggers(t)))
+    if cjk_routes and latin_routes:
+        dominant_cjk = cjk_routes >= latin_routes
+        for t in active:
+            rt = real_triggers(t)
+            if not rt:
+                continue
+            all_cjk = all(has_cjk(x) for x in rt)
+            all_latin = all(not has_cjk(x) for x in rt)
+            if dominant_cjk and all_latin:
+                warns.append(("language", f"{group} {t['id']}: triggers are English-only but most entries use CJK"))
+            elif (not dominant_cjk) and all_cjk:
+                warns.append(("language", f"{group} {t['id']}: triggers are CJK-only but most entries use English"))
+
+    # Compare overlap only within the same axis. A task route and a domain
+    # overlay are intentionally orthogonal and may share words without competing.
+    tok = {t["id"]: tokens(t) for t in active}
+    df = {}
+    for toks in tok.values():
+        for w in toks:
+            df[w] = df.get(w, 0) + 1
+    ids = [t["id"] for t in active]
+    for i in range(len(ids)):
+        for j in range(i + 1, len(ids)):
+            shared = {w for w in (tok[ids[i]] & tok[ids[j]]) if df.get(w, 0) == 2}
+            if len(shared) >= 2:
+                warns.append(("overlap", f"{group} {ids[i]} ~ {ids[j]}: share {sorted(shared)} — match ambiguity risk"))
+    return active, warns
+
+task_routes, task_warns = analyze(tasks, "task route")
+domain_overlays, overlay_warns = analyze(overlays, "domain overlay")
+warns = task_warns + overlay_warns
 
 print(f"Route health — {root.name}  (static routing-quality lint; advisory, no logging)")
 print("-" * 66)
 if not warns:
-    print(f"  OK: {len(non_other)} routes, no quality smells.")
+    print(f"  OK: {len(task_routes)} task routes + {len(domain_overlays)} domain overlays, no quality smells.")
 else:
     order = {"no-triggers": 0, "weak-triggers": 1, "language": 2, "overlap": 3}
     for _, msg in sorted(warns, key=lambda w: order.get(w[0], 9)):
         print(f"  ! {msg}")
     print()
-    print(f"=> {len(warns)} warning(s) across {len(non_other)} routes. Advisory — fix the")
+    print(f"=> {len(warns)} warning(s) across {len(task_routes)} task routes + {len(domain_overlays)} domain overlays. Advisory — fix the")
     print("   high-value ones (no/weak triggers). sync-routing.sh --check covers hard breakage.")
 PY

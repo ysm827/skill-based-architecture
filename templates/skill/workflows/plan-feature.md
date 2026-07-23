@@ -31,6 +31,8 @@ For a business-bearing module, read its routed business global model before trea
 
 Record `business-model impact: unchanged / proposed change / unknown`. A proposed change to a type system, macro flow, state machine, boundary, or core invariant is a design decision, not an implementation detail. Keep approved-but-unimplemented semantics in the Plan; update the formal model only when code, tests, and behavior land. If the model is absent or locally unclear and the gap blocks planning, follow the project's routed business-model workflow: ask whether to model now only when completely absent; otherwise search first and ask only for the missing macro meaning.
 
+If new evidence overturns a load-bearing conclusion, do not silently replace it: re-check the chosen approach, acceptance criteria, boundaries, and Task Anchor before continuing. The Agent may verify facts, but a normative business judgment requires confirmation from the business owner.
+
 ## Brainstorm — Diverge Before Converging
 
 For Complex/Large work, inspect adjacent evidence, then generate at least two genuinely different solution shapes with honest trade-offs. For Large or highly ambiguous work, present the chosen design and obtain buy-in before writing Task Breakdown. Trivial/Simple work skips this.
@@ -40,6 +42,8 @@ For Complex/Large work, inspect adjacent evidence, then generate at least two ge
 Create only `prd.md` initially; add a sibling only when content has an independent loading reason. Use these section names, in order, only when warranted: Context; Problem; Options Considered; Chosen Approach; Requirements & Acceptance Criteria; Out of Scope; Task Breakdown; Open Questions.
 
 Plans are active while `draft` or `executing`; on `done` or `abandoned`, freeze them as audit history. If the workflow-state hook is installed, point `.skill-workflow-state` at this workflow while planning and remove it at closure.
+
+Only when the task migrates, deletes, or supersedes durable knowledge, record a compact knowledge-impact contract in the existing Plan: legacy source, active destination, owner, activation path, and validation. Do not create a migration dossier or fixed ledger for an ordinary requirement; when a many-file migration genuinely needs one, freeze it after reconciliation instead of maintaining it forever.
 
 When the user approves the design and requests implementation, pass its chosen outcome, acceptance criteria, boundaries, and task breakdown to [`task-execution.md`](task-execution.md). That protocol creates the Task Anchor and harness-native execution Plan; do not use this design dossier as live step state.
 
@@ -55,7 +59,7 @@ For two or more dependent tasks, declare an executable interface per task:
 - **Acceptance**: literal command or observable behavior
 ```
 
-Files+Produces can map to Outputs; shared Files+Consumes to Inputs; forbidden paths to Forbidden Zones; Acceptance to Acceptance Criteria. This is a possible Mode 2 handoff, not automatic delegation: task count is not worker count, and only independent, mechanically reviewable, net-positive workstreams dispatch. Projects that explicitly adopt the upstream Tests-as-Spec guide may add their own routed test-case contract here.
+Task heading maps to Task Ref; Role is chosen at dispatch; Files+Produces map to Outputs; shared Files+Consumes to Inputs; forbidden paths to Forbidden Zones; Acceptance to Acceptance Criteria. This is a possible Mode 2 handoff, not automatic delegation: task count is not worker count, and only independent, mechanically reviewable, net-positive workstreams dispatch. Projects that explicitly adopt the upstream Tests-as-Spec guide may add their own routed test-case contract here.
 
 ## Complex Steps
 

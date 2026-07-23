@@ -99,12 +99,12 @@ Real workflow templates live under [`templates/skill/workflows/`](templates/skil
 | [`plan-large.md`](templates/skill/workflows/plan-large.md) | Large-only multi-perspective analysis and Synthesis contract; not loaded by ordinary plans. |
 | [`profile-project.md`](templates/skill/workflows/profile-project.md) | Three-axis project profiling (structure / execution / topology) before scaffolding. |
 | [`profile-business-model.md.example`](templates/skill/workflows/profile-business-model.md.example) | Opt-in product-project workflow for stable macro business meaning: initialization candidates, missing vs unclear calibration, semantic read-back, and routed activation. Rename/adapt only after real pressure. |
-| [`update-upstream.md`](templates/skill/workflows/update-upstream.md) | Agent-led upstream refresh — clone, classify, compare, port, validate (including conformance against upstream's manifest). |
+| [`update-upstream.md`](templates/skill/workflows/update-upstream.md) | Agent-led upstream refresh — classify vendor/project-owned/generated/runtime-data owners, path-safe sync, compare, port, and validate. |
 | [`change-managed.md`](templates/skill/workflows/change-managed.md) | Non-bug changes with multiple derived/synced targets — defines scope, finds source-of-truth, maps fan-out, runs drift checks. |
 | [`edit-templates.md`](templates/skill/workflows/edit-templates.md) | Editing the upstream `templates/` tree — admission threshold, two-real-projects test, anti-pattern list. |
 | [`subagent-auxiliary.md`](templates/skill/workflows/subagent-auxiliary.md) | Day-to-day mechanical/result-only delegation from ordinary workflows. |
 | [`subagent-driven.md`](templates/skill/workflows/subagent-driven.md) | Planned multi-subtask/long-run mode selector; routes to full orchestration. |
-| [`subagent-orchestration.md`](templates/skill/workflows/subagent-orchestration.md) | Mode 2 contract dispatch, two-stage review, Return Status routing, and degraded mode. |
+| [`subagent-orchestration.md`](templates/skill/workflows/subagent-orchestration.md) | Mode 2 Task Ref/Role dispatch, provenance Evidence return, two-stage main-agent review, Return Status routing, and degraded mode. |
 
 For the "would two real projects disagree?" admission test that gates new template content, see [`templates/ANTI-TEMPLATES.md`](templates/ANTI-TEMPLATES.md).
 

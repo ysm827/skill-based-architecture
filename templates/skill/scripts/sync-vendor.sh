@@ -47,6 +47,58 @@ if [[ ! -f "$MANIFEST" ]]; then
   exit 2
 fi
 
+TMP_DIR="$(mktemp -d)"; trap 'rm -rf "$TMP_DIR"' EXIT
+VENDOR_LIST="$TMP_DIR/vendor-list"; BASE_TMP="$TMP_DIR/base"
+if ! awk '
+  BEGIN { inside=0; found=0; count=0; bad=0 }
+  function fail(msg) { print "FAIL: " msg > "/dev/stderr"; bad=1 }
+  {
+    line=$0
+    if (!inside) {
+      if (line ~ /^vendor:[[:space:]]*(#.*)?$/) { inside=1; found=1 }
+      next
+    }
+    if (line ~ /^[^[:space:]#]/) exit
+    if (line ~ /^[[:space:]]*($|#)/) next
+    if (line ~ /^  -[[:space:]]+/) {
+      sub(/^  -[[:space:]]+/, "", line); sub(/[[:space:]]+$/, "", line)
+      if (line == "") fail("empty vendor path")
+      else { print line; count++ }
+      next
+    }
+    fail("invalid vendor manifest line: " line)
+  }
+  END {
+    if (!found) fail("sync-manifest.yaml has no vendor block")
+    else if (count == 0) fail("sync-manifest.yaml vendor block is empty")
+    if (bad) exit 1
+  }
+' "$MANIFEST" >"$VENDOR_LIST"; then
+  exit 2
+fi
+
+validate_vendor_path() {
+  local f="$1" probe part
+  local -a parts
+  case "$f" in
+    ""|/*|.|..|./*|../*|*/.|*/..|*/./*|*/../*|*//*|*/)
+      echo "FAIL: unsafe vendor path: $f" >&2; return 1 ;;
+  esac
+  case "$f" in
+    sync-manifest.yaml|protocol-blocks/*|scripts/*) ;;
+    *) echo "FAIL: vendor path is outside allowed owners: $f" >&2; return 1 ;;
+  esac
+  IFS='/' read -r -a parts <<< "$f"
+  probe="$SKILL_ROOT"
+  for part in "${parts[@]}"; do
+    probe="$probe/$part"
+    if [[ -L "$probe" ]]; then
+      echo "FAIL: vendor target contains a symlink component: $f" >&2
+      return 1
+    fi
+  done
+}
+
 SYNC_FILE="$SKILL_ROOT/.upstream-sync"
 SYNCED_SHA="$(grep -E '^synced_sha:' "$SYNC_FILE" 2>/dev/null | head -1 | sed -E 's/^synced_sha:[[:space:]]*//')"
 BASE_OK=1
@@ -59,11 +111,11 @@ if [[ -z "$SYNCED_SHA" || "$SYNCED_SHA" == *"<"* ]] \
   echo ""
 fi
 
-BASE_TMP="$(mktemp)"; trap 'rm -f "$BASE_TMP"' EXIT
 new=0; upd=0; ok=0; conflict=0; dropped=0
 
 while IFS= read -r F; do
   [[ -z "$F" ]] && continue
+  validate_vendor_path "$F" || exit 2
   upnew="$UP/templates/skill/$F"; loc="$SKILL_ROOT/$F"
   if [[ ! -f "$upnew" ]]; then
     if [[ -f "$loc" ]]; then
@@ -88,7 +140,7 @@ while IFS= read -r F; do
     echo "LOCAL-EDIT $F  (differs from base — reconcile by hand: port your edit upstream, or keep the fork and record why)"
     conflict=$((conflict+1))
   fi
-done < <(grep -E '^  - ' "$MANIFEST" | sed -E 's/^  - //')
+done < "$VENDOR_LIST"
 
 echo ""
 mode="dry-run"; [[ $APPLY -eq 1 ]] && mode="applied"

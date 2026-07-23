@@ -54,6 +54,37 @@ required_sections:
       - "subagent-auxiliary.md"
       - "subagent-driven.md"
       - "subagent-orchestration.md"
+      - "Task Ref/Role dispatch"
+      - "vendor/project-owned/generated/runtime-data owners"
+
+  - file: docs/sba-bible.md
+    must_contain:
+      - "## 产品边界"
+      - "SBA 就是一个 Skill，不是 Agent 操作系统"
+      - "使用所在 harness 已有的 Plan、Subagent 和工具能力"
+      - "不自建常驻服务、任务数据库、统一状态机或独立调度 runtime"
+      - "## 最高纲领"
+      - "## 要证明的三件事"
+      - "看到更完整的信息"
+      - "在没有标准答案时做判断"
+      - "让别人按照你的意愿做事情"
+      - "## 真正的不可替代"
+      - "定义标准、判断风险、协调资源、带出结果"
+      - "新机制必须减少责任或解决真实失败，不能只是让架构显得完整"
+      - "默认核心应该更小但完整"
+      - "规则必须能被正确激活；仅仅存进仓库不算产生价值"
+      - "Agent 的结论必须可复核"
+      - "语义完整性优先于代码改动最少，但验证成本必须与风险匹配"
+      - "跨 harness 兼容应当优雅降级"
+      - "SBA 负责吸收工程复杂度"
+      - "不发展成 Agent 操作系统、任务数据库或项目管理平台"
+      - "不为了“以后也许有用”持续增加文件、状态、marker、脚本和术语"
+      - "不用结构检查的绿色结果冒充语义正确"
+      - "不因为外部项目设计漂亮就直接吸收"
+      - "新证据推翻承重结论时，不得静默覆盖"
+      - "涉及规范性业务判断时，由业务 owner 确认"
+      - "## 方向决策检查"
+      - "它不进入下游模板"
 
   # WORKFLOW.md after the 2026-05-09 split is the Quick Start entry; the full
   # 9-phase content (including Phase 9 pressure-test) moved to
@@ -88,6 +119,18 @@ required_sections:
       - "reconciliation"
       - "cross-implementation stability"
 
+  - file: references/business-global-model.md
+    must_contain:
+      - "## Orthogonal task and domain routing"
+      - "domain_overlays"
+      - "task_route_id"
+      - "## Cross-owner reads"
+      - "owner_roots"
+      - "owner:<owner-id>:<path>"
+      - "target existence as unverified"
+      - "## Provenance and retirement"
+      - "not a permanent double-maintenance protocol"
+
 # Files required to exist (presence-only check). Drift here means a
 # self-hosting structural piece was deleted without updating routing.
 required_files:
@@ -103,3 +146,4 @@ required_files:
   - path: templates/skill/scripts/check-version-conformance.sh
   - path: templates/skill/workflows/task-execution.md
   - path: docs/task-anchor-native-plan.md
+  - path: docs/sba-bible.md

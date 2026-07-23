@@ -50,7 +50,7 @@ fi
 
 # Workflows are active procedures, not lookup material: a workflow referenced
 # only by another dead workflow is not route-reachable and must fail here.
-ACTIVE_DIRS=(architecture conventions gotchas rules workflows)
+ACTIVE_DIRS=(architecture conventions gotchas rules workflows references/business)
 TOKEN_RE='(skill:|code:)?(architecture|conventions|gotchas|rules|references|workflows)/[A-Za-z0-9._/-]+\.md'
 
 strip_fences() { awk 'BEGIN{f=0} /^```/ {f=1-f; next} !f' "$1"; }
@@ -103,8 +103,7 @@ TOTAL=0
 echo "Route-reachability — namespace=$NAMESPACE, root=$ROOT"
 echo "============================================================"
 for dir in "${ACTIVE_DIRS[@]}"; do
-  for file in "$ROOT/$dir"/*.md; do
-    [[ -f "$file" ]] || continue
+  while IFS= read -r file; do
     case "$(basename "$file")" in README.md) continue ;; esac
     TOTAL=$((TOTAL+1))
     rel="${file#$ROOT/}"
@@ -112,7 +111,7 @@ for dir in "${ACTIVE_DIRS[@]}"; do
       echo "UNREACHED  $rel"
       UNREACHED=$((UNREACHED+1))
     fi
-  done
+  done < <(find "$ROOT/$dir" -type f -name '*.md' 2>/dev/null | sort)
 done
 
 echo ""

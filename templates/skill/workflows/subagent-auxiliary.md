@@ -17,10 +17,10 @@ Any no/unknown means stay inline. One foreground worker followed by waiting is n
 ## Dispatch
 
 1. Name the main-thread work that will continue.
-2. Provide Goal, exact Inputs, expected Outputs, Forbidden Zones, and literal Acceptance Criteria.
+2. Provide Task Ref, Role, Goal, exact Inputs, expected Outputs, Forbidden Zones, and literal Acceptance Criteria.
 3. Dispatch the minimum admitted workers; workers do not spawn workers.
 4. Continue the named work. Wait only when every remaining critical path depends on running workers, using one bounded/event-driven wait rather than polling.
-5. Verify the returned verdict/artifact against the contract before using it; a worker return does not complete the owning Native Plan step.
+5. Verify returned Evidence and the verdict/artifact against the contract before using them; self-reported provenance does not complete the owning Native Plan step.
 
 ## Main-Agent Boundary
 

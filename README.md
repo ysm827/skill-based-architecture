@@ -173,6 +173,7 @@ Per-tool templates: [`references/per-tool-shells.md`](references/per-tool-shells
 | File | Content |
 |---|---|
 | [SKILL.md](SKILL.md) | Skill entry: when to use, target structure, core principles |
+| [docs/sba-bible.md](docs/sba-bible.md) | SBA product beliefs, development direction, and the decision gate for major new mechanisms |
 | [WORKFLOW.md](WORKFLOW.md) | Migration guide: Quick Start scaffold, full 9-phase process, downstream upgrade |
 | [TEMPLATES-GUIDE.md](TEMPLATES-GUIDE.md) | Annotated guide for template families, Task Execution, and Task Closure |
 | [docs/task-anchor-native-plan.md](docs/task-anchor-native-plan.md) | User-facing Task Anchor, Native Plan, Workflow, and Closure model |

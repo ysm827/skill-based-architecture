@@ -2,17 +2,34 @@
 # sync-routing.sh — Generate Always Read, Common Tasks, shell bootstraps (from
 # routing.yaml), and the shared behavior block (auto-triggers + red flags) into shells.
 # Usage:
-#   bash scripts/sync-routing.sh [skill-name|skill-root] [--check]
-#   bash skills/<name>/scripts/sync-routing.sh <name> [--check]
+#   bash scripts/sync-routing.sh [skill-name|skill-root] [--check] [--workspace-root <path>]
+#   bash skills/<name>/scripts/sync-routing.sh <name> [--check] [--workspace-root <path>]
 
 set -euo pipefail
 
 MODE="sync"
 TARGET=""
-for arg in "$@"; do
-  case "$arg" in
-    --check) MODE="check" ;;
-    *) TARGET="$arg" ;;
+WORKSPACE_ROOT=""
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --check)
+      MODE="check"
+      shift
+      ;;
+    --workspace-root)
+      [[ $# -ge 2 ]] || { echo "--workspace-root requires a path" >&2; exit 1; }
+      WORKSPACE_ROOT="$2"
+      shift 2
+      ;;
+    --workspace-root=*)
+      WORKSPACE_ROOT="${1#*=}"
+      shift
+      ;;
+    *)
+      [[ -z "$TARGET" ]] || { echo "Unexpected extra target: $1" >&2; exit 1; }
+      TARGET="$1"
+      shift
+      ;;
   esac
 done
 
@@ -27,16 +44,18 @@ elif [[ -f "SKILL.md" && -f "routing.yaml" ]]; then
 elif [[ -f "SKILL.md.template" && -f "routing.yaml" ]]; then
   SKILL_ROOT="."
 else
-  echo "Usage: bash sync-routing.sh [skill-name|skill-root] [--check]" >&2
+  echo "Usage: bash sync-routing.sh [skill-name|skill-root] [--check] [--workspace-root <path>]" >&2
   exit 1
 fi
 
-python3 - "$SKILL_ROOT" "$MODE" <<'PY'
+python3 - "$SKILL_ROOT" "$MODE" "$WORKSPACE_ROOT" <<'PY'
 from pathlib import Path
 import sys
+import re
 
 skill_root = Path(sys.argv[1]).resolve()
 mode = sys.argv[2]
+workspace_root = Path(sys.argv[3]).resolve() if sys.argv[3] else None
 manifest = skill_root / "routing.yaml"
 summary_start = "<!-- ROUTING_SUMMARY_START -->"
 summary_end = "<!-- ROUTING_SUMMARY_END -->"
@@ -110,6 +129,8 @@ def is_code_path(item: str) -> bool:
 def parse_manifest():
     always_read = []
     tasks = []
+    overlays = []
+    owner_roots = {}
     current = None
     section = None
     top_section = None
@@ -124,14 +145,29 @@ def parse_manifest():
             continue
         if stripped == "tasks:":
             top_section = "tasks"
+            current = None
+            section = None
+            continue
+        if stripped == "domain_overlays:":
+            top_section = "domain_overlays"
+            current = None
+            section = None
+            continue
+        if stripped == "owner_roots:":
+            top_section = "owner_roots"
+            current = None
             section = None
             continue
         if top_section == "always_read" and raw.startswith("  - "):
             always_read.append(clean(stripped[2:]))
             continue
+        if top_section == "owner_roots" and raw.startswith("  ") and not raw.startswith("    ") and ":" in stripped:
+            key, value = stripped.split(":", 1)
+            owner_roots[clean(key)] = clean(value)
+            continue
         if raw.startswith("  - id:"):
             current = {"id": clean(raw.split(":", 1)[1]), "labels": {}, "required_reads": [], "trigger_examples": []}
-            tasks.append(current)
+            (overlays if top_section == "domain_overlays" else tasks).append(current)
             section = None
             continue
         if current is None:
@@ -170,11 +206,15 @@ def parse_manifest():
             section = None
     if not tasks:
         raise SystemExit("routing.yaml has no tasks")
-    return always_read, tasks
+    return always_read, tasks, overlays, owner_roots
 
-always_read, tasks = parse_manifest()
+always_read, tasks, overlays, owner_roots = parse_manifest()
 
-def validate_schema(always_read, tasks):
+def safe_relative_path(value: str) -> bool:
+    path = Path(value)
+    return bool(value.strip()) and not path.is_absolute() and ".." not in path.parts
+
+def validate_schema(always_read, tasks, overlays, owner_roots):
     errors = []
     ids = [task.get("id", "") for task in tasks]
     duplicates = sorted({task_id for task_id in ids if ids.count(task_id) > 1})
@@ -190,6 +230,26 @@ def validate_schema(always_read, tasks):
             errors.append(f"{task_id}: missing labels")
         if not task.get("workflow"):
             errors.append(f"{task_id}: missing workflow")
+    overlay_ids = [overlay.get("id", "") for overlay in overlays]
+    for overlay_id in sorted({item for item in overlay_ids if overlay_ids.count(item) > 1}):
+        errors.append(f"duplicate domain overlay id: {overlay_id}")
+    for overlay in overlays:
+        overlay_id = overlay.get("id", "")
+        if not overlay_id:
+            errors.append("domain overlay missing id")
+        if not overlay.get("labels"):
+            errors.append(f"{overlay_id}: missing labels")
+        if not overlay.get("required_reads"):
+            errors.append(f"{overlay_id}: missing required_reads")
+        if not overlay.get("trigger_examples"):
+            errors.append(f"{overlay_id}: missing trigger_examples")
+        if overlay.get("workflow"):
+            errors.append(f"{overlay_id}: domain overlay must inherit the task workflow")
+    for owner, root in owner_roots.items():
+        if not re.fullmatch(r"[A-Za-z0-9_-]+", owner):
+            errors.append(f"invalid owner id: {owner}")
+        if not safe_relative_path(root):
+            errors.append(f"owner root must be a safe workspace-relative path: {owner}: {root}")
     for item in always_read:
         if not item or "FILL:" in item:
             continue
@@ -201,7 +261,7 @@ def validate_schema(always_read, tasks):
             errors.append(f"always_read path should be skill-relative one of {', '.join(tier_prefixes)}: {item}")
     return errors
 
-schema_errors = validate_schema(always_read, tasks)
+schema_errors = validate_schema(always_read, tasks, overlays, owner_roots)
 if schema_errors:
     for err in schema_errors:
         print(f"FAIL: {err}")
@@ -246,17 +306,37 @@ def format_workflow(value):
         return f"`{value}`"
     return value
 
-summary_block = "\n".join(
+task_summary = "\n".join(
     f"- {label_for(task)} -> reads {format_reads(task.get('required_reads', []))}; "
     f"workflow {format_workflow(task.get('workflow', ''))}"
     f"{('; ' + task.get('route', '').strip()) if task.get('route', '').strip() else ''}"
     f"{format_triggers(task.get('trigger_examples', []))}"
     for task in tasks
 )
+if overlays:
+    overlay_intro = (
+        "Domain overlays are active. Independently match zero or more `domain_overlays`; "
+        "they append `required_reads` but never replace the task workflow. Keep current-Session "
+        "provenance as `task_route_id`, `domain_overlay_ids`, and `merged_required_reads`; "
+        "this is not persistent task state.\n"
+    )
+    summary_block = overlay_intro + "\n" + task_summary
+else:
+    summary_block = task_summary
 always_skill_block = format_always_skill(always_read)
 always_shell_block = format_always_shell(always_read)
 
-bootstrap_block = f"""Task routes live in `skills/{name}/routing.yaml`.
+if overlays:
+    bootstrap_block = f"""Task routes and optional domain overlays live in `skills/{name}/routing.yaml`.
+
+For every new task:
+1. Re-match one task route by `labels`, `trigger_examples`, and task intent.
+2. Independently match zero or more `domain_overlays`; overlays only append `required_reads` and never replace the task workflow.
+3. Merge Always Read + task-route + overlay reads. Keep current-Session provenance as `task_route_id`, `domain_overlay_ids`, and `merged_required_reads`; do not persist a task database.
+4. Resolve `owner:<owner-id>:<path>` through declared `owner_roots` from the workspace root. Treat it as a bounded context read, not a new task or workflow switch.
+5. Follow the task route's `workflow`; if no task route matches, use `other`. If no overlay matches, add no domain read."""
+else:
+    bootstrap_block = f"""Task routes live in `skills/{name}/routing.yaml`.
 
 For every new task:
 1. Read `skills/{name}/routing.yaml`.
@@ -280,6 +360,49 @@ behavior_block = f"""## Auto-Triggers
 
 def validate_paths():
     errors = []
+    owner_ref_pattern = re.compile(r"^owner:([A-Za-z0-9_-]+):(.+)$")
+    owner_refs = []
+
+    def under(path: Path, root: Path) -> bool:
+        try:
+            path.relative_to(root)
+            return True
+        except ValueError:
+            return False
+
+    def validate_owner_ref(item, source):
+        match = owner_ref_pattern.fullmatch(item)
+        if not match:
+            errors.append(f"{source}: malformed owner reference: {item}")
+            return
+        owner, relative_text = match.groups()
+        if owner not in owner_roots:
+            errors.append(f"{source}: undeclared owner id: {owner}")
+            return
+        if not safe_relative_path(relative_text):
+            errors.append(f"{source}: owner reference must be a safe relative path: {item}")
+            return
+        owner_refs.append((source, item))
+        if workspace_root is None:
+            return
+        owner_base = (workspace_root / owner_roots[owner]).resolve()
+        target = (owner_base / relative_text).resolve()
+        if not under(owner_base, workspace_root) or not under(target, owner_base):
+            errors.append(f"{source}: owner reference escapes declared workspace boundary: {item}")
+        elif not target.exists():
+            errors.append(f"{source}: owner target missing: {item} -> {target}")
+
+    def validate_read(item, source):
+        if item.startswith("owner:"):
+            validate_owner_ref(item, source)
+            return
+        if "*" in item or "FILL:" in item or is_code_path(item):
+            return
+        if "/" in item:
+            target = skill_root / normalize_path(item).split("#", 1)[0]
+            if not target.exists():
+                errors.append(f"{source}: required_read missing: {item}")
+
     for item in always_read:
         if "*" in item or "FILL:" in item:
             continue
@@ -298,17 +421,13 @@ def validate_paths():
             if not target.exists():
                 errors.append(f"{task.get('id')}: workflow missing: {workflow}")
         for item in task.get("required_reads", []):
-            if "*" in item or "FILL:" in item or item.startswith("task-relevant "):
-                continue
-            if is_code_path(item):
-                continue
-            if "/" in item:
-                target = skill_root / normalize_path(item).split("#", 1)[0]
-                if not target.exists():
-                    errors.append(f"{task.get('id')}: required_read missing: {item}")
-    return errors
+            validate_read(item, task.get("id"))
+    for overlay in overlays:
+        for item in overlay.get("required_reads", []):
+            validate_read(item, f"domain overlay {overlay.get('id')}")
+    return errors, owner_refs
 
-path_errors = validate_paths()
+path_errors, owner_refs = validate_paths()
 if path_errors:
     for err in path_errors:
         print(f"FAIL: {err}")
@@ -383,7 +502,11 @@ if failed:
     print("\nRun: bash skills/<name>/scripts/sync-routing.sh <name>")
     raise SystemExit(1)
 if mode == "check":
-    print("Routing manifest check passed.")
+    if owner_refs and workspace_root is None:
+        print(f"UNVERIFIED: {len(owner_refs)} owner reference(s) passed syntax/owner checks, but target existence was not checked; rerun with --workspace-root <path>.")
+        print("Routing manifest structural check passed; cross-owner target verification remains open.")
+    else:
+        print("Routing manifest check passed.")
 elif not changed:
     print("Routing summary and bootstraps already up to date.")
 PY

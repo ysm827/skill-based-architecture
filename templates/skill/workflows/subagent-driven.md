@@ -17,7 +17,7 @@ Many files/tasks, a long runtime, or “explore + implement + review” do not q
 ## Mode 2 Entry
 
 1. Finish the Native Plan and identify the truly independent subset; keep one main-agent integration/decision step active.
-2. Give each worker Goal, Inputs, Outputs, Forbidden Zones, Acceptance Criteria, and required Return Status.
+2. Give each worker Task Ref, Role, Goal, Inputs, Outputs, Forbidden Zones, Acceptance Criteria, and the required Evidence + Return Status envelope.
 3. Pass contract-scoped artifacts, not the conversation or intended answer.
 4. Dispatch the minimum independent set together and continue the named main-thread work.
 5. Follow [`subagent-orchestration.md`](subagent-orchestration.md) for review and merge/reject routing.

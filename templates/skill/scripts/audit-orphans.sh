@@ -47,7 +47,7 @@ TIER_DIRS=(rules references architecture gotchas conventions)
 AUDIT_DIRS=("${TIER_DIRS[@]}" workflows)
 LOCAL_SOURCES=()
 for dir in workflows "${TIER_DIRS[@]}"; do
-  for file in "$ROOT/$dir"/*.md; do [[ -f "$file" ]] && LOCAL_SOURCES+=("$file"); done
+  while IFS= read -r file; do LOCAL_SOURCES+=("$file"); done < <(find "$ROOT/$dir" -type f -name '*.md' 2>/dev/null | sort)
 done
 for file in "$ROOT"/*.md; do [[ -f "$file" ]] && LOCAL_SOURCES+=("$file"); done
 if [[ -f "$ROOT/../../AGENTS.md" || -f "$ROOT/../../CLAUDE.md" ]]; then
@@ -102,8 +102,7 @@ TOTAL=0
 echo "Orphan scan — namespace=$NAMESPACE, root=$ROOT"
 echo "============================================================"
 for dir in "${AUDIT_DIRS[@]}"; do
-  for file in "$ROOT/$dir"/*.md; do
-    [[ -f "$file" ]] || continue
+  while IFS= read -r file; do
     case "$(basename "$file")" in README.md|index.md) continue ;; esac
     TOTAL=$((TOTAL+1))
     rel="${file#$ROOT/}"
@@ -112,7 +111,7 @@ for dir in "${AUDIT_DIRS[@]}"; do
       echo "ORPHAN  $rel"
       ORPHANS=$((ORPHANS+1))
     fi
-  done
+  done < <(find "$ROOT/$dir" -type f -name '*.md' 2>/dev/null | sort)
 done
 
 echo ""

@@ -26,6 +26,8 @@ required_sections:
       - "Steps must be numbered"
       - "do not collapse the brief into prose"
       - "Before each main Plan step"
+      - "Never silently overwrite a load-bearing conclusion"
+      - "business owner's confirmation"
       - "do not narrate it before every tool call"
       - "does not create durable planning files or recover task state across Sessions"
     must_not_contain:
@@ -42,6 +44,8 @@ required_sections:
       - "[workflow-state:planning]"
       - "it is not the runtime Native Plan"
       - "pass its chosen outcome, acceptance criteria, boundaries, and task breakdown"
+      - "If new evidence overturns a load-bearing conclusion"
+      - "legacy source, active destination, owner, activation path, and validation"
     must_not_contain:
       - "Pervasive reverse-question — default habit"
       - "one per lens"
@@ -62,6 +66,8 @@ required_sections:
       - "### Rationalizations to Reject"
       - "### Red Flags"
       - "## After-Action Review"
+      - "durable knowledge migrated/deleted/superseded"
+      - "rather than creating a mandatory ledger"
 
   - file: workflows/update-rules.md
     must_contain:
@@ -70,6 +76,28 @@ required_sections:
       - "### Reconciliation Gate"
       - "### Activation Check"
       - "### Generalization Rule"
+      - "do not create a fixed ledger solely to satisfy the gate"
+
+  - file: scripts/sync-routing.sh
+    must_contain:
+      - "domain_overlays"
+      - "domain overlay must inherit the task workflow"
+      - "owner_roots"
+      - "owner:<owner-id>:<path>"
+      - "--workspace-root"
+      - "task_route_id"
+      - "cross-owner target verification remains open"
+    must_not_contain:
+      - "allowed_apps"
+
+  - file: scripts/audit-orphans.sh
+    must_contain:
+      - "-type f -name '*.md'"
+
+  - file: scripts/route-reachability.sh
+    must_contain:
+      - "references/business"
+      - "-type f -name '*.md'"
 
   - file: workflows/maintain-docs.md
     must_contain:
@@ -131,7 +159,21 @@ required_sections:
     must_contain:
       - "## 1. Contract"
       - "## 3. Main-Agent Review"
+      - "Task Ref"
+      - "Context Read"
+      - "provenance index, not proof"
       - "does **not** run project-wide Task Closure"
+
+  - file: protocol-blocks/subagent-contract.md
+    must_contain:
+      - "## Task Ref"
+      - "## Role"
+      - "## Evidence"
+      - "Context Read"
+      - "Files Changed"
+      - "Checks Run"
+      - "Remaining Risks"
+      - "provenance index, not proof"
 
   - file: workflows/receiving-review.md
     must_contain:
@@ -143,6 +185,10 @@ required_sections:
       - "## Hard Rules"
       - "## Procedure"
       - "conformance.yaml"
+      - "Vendor: only paths explicitly listed"
+      - "Project-owned: every non-vendor source file"
+      - "Generated: Always Read, Common Tasks"
+      - "Runtime-data: hook state, caches, secrets"
 
   - file: workflows/change-managed.md
     must_contain:

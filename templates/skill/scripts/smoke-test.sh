@@ -14,7 +14,8 @@
 #   1. Structural Checks          — SKILL.md, rules/, workflows/, gotchas,
 #                                   Cursor registration entry, thin shells exist;
 #                                   SessionStart re-injection hook wired (1d, WARN)
-#   2. Line Count Budgets         — SKILL.md dual budget (description ≤ 25 + body ≤ 90), shells ≤ 60 lines,
+#   2. Line Count Budgets         — SKILL.md dual budget (description ≤ 25 + body ≤ 90), routing task core ≤ 140,
+#                                   optional domain overlays reported separately, shells ≤ 60 lines,
 #                                   gotchas/pitfall ≤ $GOTCHAS_MAX_LINES (default 400),
 #                                   no duplicate ## headings in gotchas/pitfall files,
 #                                   Common Tasks ≤ $COMMON_TASKS_MAX_ROWS rows
@@ -373,6 +374,34 @@ check_lines() {
   fi
 }
 
+check_routing_budget() {
+  local file="$1"
+  [[ -f "$file" ]] || return
+  if grep -q '^domain_overlays:' "$file"; then
+    local core_lines overlay_lines
+    core_lines=$(awk '
+      /^domain_overlays:/ { in_overlays=1; next }
+      /^tasks:/ { in_overlays=0 }
+      !in_overlays { count++ }
+      END { print count+0 }
+    ' "$file")
+    overlay_lines=$(awk '
+      /^domain_overlays:/ { in_overlays=1; next }
+      /^tasks:/ { in_overlays=0 }
+      in_overlays { count++ }
+      END { print count+0 }
+    ' "$file")
+    if [[ "$core_lines" -le 140 ]]; then
+      pass "routing.yaml task core: $core_lines lines (≤ 140)"
+    else
+      fail "routing.yaml task core: $core_lines lines (exceeds 140 limit)"
+    fi
+    pass "routing.yaml optional domain overlays: $overlay_lines lines (reported separately; semantic admission is route-reviewed)"
+  else
+    check_lines "$file" 140 "routing.yaml"
+  fi
+}
+
 # SKILL.md uses dual budgets — description is the activation gate (frontmatter)
 # and benefits from rich quoted trigger phrases; body is the navigation hub
 # (Always Read / Common Tasks / boundaries) and must stay tight. Splitting the
@@ -411,7 +440,7 @@ check_skill_md_budget() {
 }
 
 check_skill_md_budget "$SKILL_MD"
-check_lines "$ROUTING_YAML" 140 "routing.yaml"  # tiered skills route to more files (architecture + gotchas/index + references) per task
+check_routing_budget "$ROUTING_YAML"
 for shell in AGENTS.md CLAUDE.md CODEX.md GEMINI.md; do
   check_lines "$shell" 60 "$shell (thin shell)"
 done
